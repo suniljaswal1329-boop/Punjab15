@@ -1,2 +1,91 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADMIN</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#000;color:#fff}.container{max-width:400px;margin:20px auto;padding:15px}.box{background:#111;border:2px solid #ffcc00;border-radius:14px;padding:20px;text-align:center}input{width:100%;padding:14px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff;font-size:22px;text-align:center;font-weight:800}button{width:100%;padding:14px;border:none;border-radius:10px;font-size:17px;font-weight:900;margin-top:10px}.btn-y{background:#ffcc00;color:#000}.btn-r{background:#ff2222;color:#fff}#msg{margin-top:12px;font-weight:800}.row{display:flex;gap:8px}</style></head><body><div class="container"><div class="box"><h2 style="color:#ffcc00">🔐 ADMIN PANEL</h2><br><input type="password" id="pass" placeholder="Password: 1329"><div class="row"><input type="number" id="a" placeholder="A="><input type="number" id="b" placeholder="B="><input type="number" id="c" placeholder="C="></div><button class="btn-y" onclick="update()">UPDATE RESULT</button><div id="msg"></div><hr style="margin:18px 0;border-top:1px solid #333"><button class="btn-r" onclick="clearH()">🗑️ DELETE ALL HISTORY</button></div></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,set,push,remove}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";const firebaseConfig={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};const app=initializeApp(firebaseConfig);const db=getDatabase(app);window.update=function(){let p=document.getElementById('pass').value,a=document.getElementById('a').value,b=document.getElementById('b').value,c=document.getElementById('c').value,m=document.getElementById('msg');if(p!=="1329"){m.innerText="❌ Wrong Password";m.style.color="#f55";return}if(a===""||b===""||c===""){m.innerText="❌ A B C bharo";m.style.color="#f55";return}let now=new Date(),t=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),d=now.toLocaleDateString('en-IN');set(ref(db,'live/result'),{a:a,b:b,c:c,time:t,date:d});push(ref(db,'history'),{a:a,b:b,c:c,time:t,date:d});m.innerText=`✅ A=${a} B=${b} C=${c} LIVE`;m.style.color="#0f0"};window.clearH=function(){if(document.getElementById('pass').value!=="1329"){alert("Password dalo");return}if(!confirm("Saara history delete?"))return;remove(ref(db,'history')).then(()=>{document.getElementById('msg').innerText="✅ History Delete";})}</script></body></html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - PUNJAB15</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;min-height:100vh;font-family:Arial;display:flex;justify-content:center;padding:20px;color:#fff}
+.box{width:100%;max-width:400px;border:2px solid #facc15;border-radius:18px;padding:18px;background:#111}
+h2{text-align:center;color:#facc15;margin-bottom:12px}
+.liveBox{background:#1f1f1f;border-radius:12px;padding:12px;text-align:center;margin-bottom:14px;border:1px dashed #facc15}
+.liveBox p{font-size:12px;color:#aaa}
+#adminTimer{font-size:32px;font-weight:900;color:#facc15;margin:4px 0}
+#adminDate{font-size:13px;background:#facc15;color:#000;display:inline-block;padding:4px 10px;border-radius:20px;font-weight:bold;margin-top:4px}
+.current{display:flex;justify-content:space-around;margin-top:10px}
+.current div{background:#000;padding:8px 12px;border-radius:10px;border:1px solid #333}
+.current b{color:#facc15}
+input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:0;background:#222;color:#fff;font-size:16px;text-align:center;font-weight:bold}
+.row{display:flex;gap:8px}
+.row input{flex:1}
+button{width:100%;padding:14px;border:0;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}
+.yellow{background:#facc15;color:#000}
+.red{background:#ef4444;color:#fff;margin-top:18px}
+#msg{text-align:center;margin-top:10px;font-weight:bold;color:#22c55e}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>🔐 ADMIN PANEL</h2>
+
+<div class="liveBox">
+<p>NEXT RESULT IN</p>
+<div id="adminTimer">--:--:--</div>
+<div id="adminDate">Loading date...</div>
+<div class="current">
+<div>A: <b id="liveA">--</b></div>
+<div>B: <b id="liveB">--</b></div>
+<div>C: <b id="liveC">--</b></div>
+</div>
+<p style="margin-top:8px" id="liveFull">Live: --</p>
+</div>
+
+<input type="password" id="pass" placeholder="Password: 1329">
+<div class="row">
+<input id="a" placeholder="A=">
+<input id="b" placeholder="B=">
+<input id="c" placeholder="C=">
+</div>
+<button class="yellow" onclick="updateResult()">UPDATE RESULT</button>
+<hr style="margin:18px 0;border:0;border-top:1px solid #333">
+<button class="red" onclick="deleteHistory()">🗑️ DELETE ALL HISTORY</button>
+<p id="msg"></p>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,set,push,remove,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
+const app=initializeApp(cfg),db=getDatabase(app);
+const ADMIN_PASSWORD="1329";
+
+function fmtDate(d){let dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'),yy=d.getFullYear();return dd+"/"+mm+"/"+yy;}
+function tick(){
+let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15,nh=n.getHours();
+if(nm>=60){nm=0;nh++;}if(nh>=24)nh=0;
+let diff=(nm-m-1)*60+(60-s);if(diff<0)diff+=3600;
+let hh=Math.floor(diff/3600),mm2=Math.floor((diff%3600)/60),ss=diff%60;
+document.getElementById('adminTimer').innerText=String(hh).padStart(2,'0')+":"+String(mm2).padStart(2,'0')+":"+String(ss).padStart(2,'0');
+let ap=nh>=12?'PM':'AM',dh=nh%12||12;
+let todayStr=fmtDate(n);
+document.getElementById('adminDate').innerText=todayStr+" | "+String(dh).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap;
+}
+setInterval(tick,1000);tick();
+
+onValue(ref(db,'live/result'),s=>{let d=s.val();if(!d)return;document.getElementById('liveA').innerText=d.a;document.getElementById('liveB').innerText=d.b;document.getElementById('liveC').innerText=d.c;document.getElementById('liveFull').innerText=`Live: ${d.date||''} ${d.time||''} | A=${d.a} B=${d.b} C=${d.c}`;});
+
+window.updateResult=()=>{
+if(document.getElementById('pass').value!=ADMIN_PASSWORD){alert("Wrong Password!");return;}
+let a=document.getElementById('a').value,b=document.getElementById('b').value,c=document.getElementById('c').value;
+if(!a||!b||!c)return alert("A B C bharo");
+let now=new Date(),dateStr=fmtDate(now),timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:true});
+set(ref(db,'live/result'),{a,b,c,time:timeStr,date:dateStr});
+push(ref(db,'history'),{a,b,c,time:timeStr,date:dateStr,timestamp:Date.now()});
+document.getElementById('msg').innerText="✅ Updated: "+dateStr+" "+timeStr+" | A="+a+" B="+b+" C="+c;
+document.getElementById('a').value="";document.getElementById('b').value="";document.getElementById('c').value="";
+}
+window.deleteHistory=()=>{
+if(document.getElementById('pass').value!=ADMIN_PASSWORD){alert("Wrong Password!");return;}
+if(confirm("Sari history delete karni hai?")){remove(ref(db,'history'));alert("Deleted");}}
+</script>
+</body>
+</html>

@@ -1,6 +1,51 @@
-<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin</title>
-<style>body{font-family:Arial;background:#222;display:flex;justify-content:center;padding:30px}.box{background:white;padding:25px;border-radius:15px;width:100%;max-width:350px}input{width:90%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:18px}button{width:100%;padding:12px;margin-top:15px;background:#0d47a1;color:white;border:none;border-radius:8px;font-size:18px}</style>
-</head><body>
-<div class="box" id="b1"><h3>Admin Login</h3><input type="password" id="p" placeholder="Password"><button onclick="if(document.getElementById('p').value=='1329'){document.getElementById('b1').style.display='none';document.getElementById('b2').style.display='block'}else{alert('Galat') }">LOGIN</button></div>
-<div class="box" id="b2" style="display:none"><h3>Result Daalo</h3><input id="r" placeholder="Ex: 6470"><button onclick="localStorage.setItem('myres',document.getElementById('r').value);alert('Ho gaya save! '+document.getElementById('r').value)">SAVE KARO</button></div>
-</body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - PUNJAB15</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#000;color:#fff}
+.container{max-width:400px;margin:60px auto;padding:15px}
+.box{background:#111;border:2px solid #ffcc00;border-radius:14px;padding:25px;text-align:center}
+input{width:100%;padding:14px;margin:10px 0;border-radius:10px;border:none;background:#222;color:#fff;font-size:20px;text-align:center}
+button{width:100%;padding:15px;background:#ffcc00;border:none;border-radius:10px;font-size:20px;font-weight:900;color:#000;margin-top:10px}
+#msg{margin-top:15px;font-weight:800;font-size:16px}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="box">
+<h2 style="color:#ffcc00">🔐 ADMIN PANEL</h2>
+<p style="color:#888;font-size:13px">Secret - Only You</p>
+<br>
+<input type="password" id="pass" placeholder="Password: 1329">
+<input type="text" id="res" placeholder="Result: 00-99">
+<button onclick="update()">UPDATE LIVE</button>
+<div id="msg"></div>
+</div>
+</div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,set,push} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+window.update=function(){
+let p=document.getElementById('pass').value;
+let n=document.getElementById('res').value;
+let m=document.getElementById('msg');
+if(p!=="1329"){m.innerText="❌ Password Galat";m.style.color="#f55";return;}
+if(n===""){m.innerText="❌ Result Likho";m.style.color="#f55";return;}
+let now=new Date();
+let t=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+let d=now.toLocaleDateString('en-IN');
+set(ref(db,'live/result'),{number:n,time:t,date:d});
+push(ref(db,'history'),{number:n,time:t,date:d});
+m.innerText="✅ LIVE: "+n+" | "+t;
+m.style.color="#0f0";
+}
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:linear-gradient(180deg,#7c3aed,#6d28d9);min-height:100vh;font-family:Arial;color:#fff;text-align:center}
-.top{padding:22px 10px 15px} .top h1{font-size:26px;font-weight:900} .top p{font-size:12px;opacity:.8;margin-top:5px}
+.top{padding:22px 10px 15px}.top h1{font-size:26px;font-weight:900}.top p{font-size:12px;opacity:.8;margin-top:5px}
 .card{background:#fff;color:#000;width:92%;max-width:400px;margin:0 auto;border-radius:28px;padding:20px 15px;box-shadow:0 20px 40px rgba(0,0,0,.3)}
 .pill{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;display:inline-block;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:bold}
 .circles{display:flex;justify-content:space-around;margin:22px 0 10px}
@@ -16,8 +16,7 @@ body{background:linear-gradient(180deg,#7c3aed,#6d28d9);min-height:100vh;font-fa
 .btn{background:#0f172a;color:#fff;border:0;padding:12px 22px;border-radius:25px;margin-top:15px;font-size:14px;font-weight:bold}
 .hist{width:94%;max-width:420px;margin:18px auto;background:#fff;border-radius:14px;overflow:hidden;color:#000;text-align:left}
 .hist h3{padding:12px;background:#f8f7ff;font-size:15px}
-table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px 4px;border-bottom:1px solid #f1f1f1;text-align:center} 
-.tag{border:1px solid #ddd;border-radius:8px;padding:3px 8px;background:#fafafa;font-weight:bold}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 4px;border-bottom:1px solid #f1f1f1;text-align:center}.tag{border:1px solid #ddd;border-radius:8px;padding:3px 8px;background:#fafafa;font-weight:bold}
 #dateModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99;align-items:center;justify-content:center}
 #dateBox{background:#fff;width:90%;max-width:360px;border-radius:16px;padding:18px;color:#000}
 #dateBox input{width:100%;padding:12px;border:2px solid #7c3aed;border-radius:10px;font-size:16px;margin:10px 0}
@@ -25,7 +24,6 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px 4px;
 </head>
 <body>
 <div class="top"><h1>PUNJAB15 Live Result</h1><p>Result updates automatically at every interval</p></div>
-
 <div class="card">
 <div class="pill" id="rtime">Loading...</div>
 <div class="circles"><div><div class="c" id="a">--</div><div class="lbl">A</div></div><div><div class="c" id="b">--</div><div class="lbl">B</div></div><div><div class="c" id="c">--</div><div class="lbl">C</div></div></div>
@@ -33,59 +31,30 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px 4px;
 <div id="timer">--:--:--</div>
 <button class="btn" onclick="openDate()">📅 Search Previous Dates</button>
 </div>
-
 <div class="hist">
 <h3>🕒 Today's Results - <span id="todayDate"></span></h3>
 <table><thead><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="hbody"><tr><td colspan="5" style="text-align:center;color:#999;padding:15px">Loading...</td></tr></tbody></table>
 </div>
-
 <div id="dateModal"><div id="dateBox">
 <h3 style="text-align:center">Search By Date</h3>
 <input type="date" id="dateInput">
 <div style="display:flex;gap:6px"><button style="flex:1;padding:12px;background:#eee;border:0;border-radius:10px;font-weight:bold" onclick="closeDate()">Close</button><button style="flex:1;padding:12px;background:#7c3aed;color:#fff;border:0;border-radius:10px;font-weight:bold" onclick="searchByDate()">Search</button></div>
 <div id="searchResult" style="margin-top:12px;max-height:300px;overflow:auto"></div>
 </div></div>
-
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
 const app=initializeApp(cfg),db=getDatabase(app);
 let allHistory=[];
 function fmtDate(d){let dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'),yy=d.getFullYear();return dd+"/"+mm+"/"+yy;}
-function tick(){
-let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15,nh=n.getHours();
-if(nm>=60){nm=0;nh++;}if(nh>=24)nh=0;
-let diff=(nm-m-1)*60+(60-s);if(diff<0)diff+=3600;
-let hh=Math.floor(diff/3600),mm2=Math.floor((diff%3600)/60),ss=diff%60;
-document.getElementById('timer').innerText=String(hh).padStart(2,'0')+":"+String(mm2).padStart(2,'0')+":"+String(ss).padStart(2,'0');
-let ap=nh>=12?'PM':'AM',dh=nh%12||12;
-let todayStr=fmtDate(n);
-document.getElementById('rtime').innerText=todayStr+" | "+String(dh).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap;
-document.getElementById('todayDate').innerText=todayStr;
-}
+function normalize(d){if(!d)return"";let p=d.split('/');if(p.length!=3)return d;return parseInt(p[0])+"/"+parseInt(p[1])+"/"+p[2];}
+function tick(){let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15,nh=n.getHours();if(nm>=60){nm=0;nh++;}if(nh>=24)nh=0;let diff=(nm-m-1)*60+(60-s);if(diff<0)diff+=3600;let hh=Math.floor(diff/3600),mm2=Math.floor((diff%3600)/60),ss=diff%60;document.getElementById('timer').innerText=String(hh).padStart(2,'0')+":"+String(mm2).padStart(2,'0')+":"+String(ss).padStart(2,'0');let ap=nh>=12?'PM':'AM',dh=nh%12||12;let todayStr=fmtDate(n);document.getElementById('rtime').innerText=todayStr+" | "+String(dh).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap;document.getElementById('todayDate').innerText=todayStr;}
 setInterval(tick,1000);tick();
 onValue(ref(db,'live/result'),s=>{let d=s.val();if(!d)return;document.getElementById('a').innerText=d.a;document.getElementById('b').innerText=d.b;document.getElementById('c').innerText=d.c;});
-onValue(ref(db,'history'),s=>{
-let d=s.val();if(!d){document.getElementById('hbody').innerHTML='<tr><td colspan=5 style="text-align:center;padding:15px;color:#999">No result today</td></tr>';return;}
-allHistory=Object.values(d).sort((x,y)=>(y.timestamp||0)-(x.timestamp||0));
-let today=fmtDate(new Date());
-let todays=allHistory.filter(x=>x.date==today);
-if(todays.length==0) todays=allHistory.slice(0,20);
-let html="";todays.forEach(r=>{html+=`<tr><td style="font-size:11px">${r.date}</td><td>${r.time}</td><td><span class=tag>${r.a}</span></td><td><span class=tag>${r.b}</span></td><td><span class=tag>${r.c}</span></td></tr>`});
-document.getElementById('hbody').innerHTML=html;
-});
+onValue(ref(db,'history'),s=>{let d=s.val();if(!d){document.getElementById('hbody').innerHTML='<tr><td colspan=5 style="text-align:center;padding:15px;color:#999">No result today</td></tr>';return;}allHistory=Object.values(d).sort((x,y)=>(y.timestamp||0)-(x.timestamp||0));let todayNorm=normalize(fmtDate(new Date()));let todays=allHistory.filter(x=>normalize(x.date)==todayNorm);if(todays.length==0)todays=allHistory.slice(0,20);let html="";todays.forEach(r=>{html+=`<tr><td style="font-size:11px">${r.date}</td><td>${r.time}</td><td><span class=tag>${r.a}</span></td><td><span class=tag>${r.b}</span></td><td><span class=tag>${r.c}</span></td></tr>`});document.getElementById('hbody').innerHTML=html;});
 window.openDate=()=>{document.getElementById('dateModal').style.display='flex';}
 window.closeDate=()=>{document.getElementById('dateModal').style.display='none';}
-window.searchByDate=()=>{
-let inp=document.getElementById('dateInput').value;if(!inp)return alert("Date select karo!");
-let p=inp.split('-');let f=p[2]+"/"+p[1]+"/"+p[0];
-let filtered=allHistory.filter(x=>x.date==f);
-let box=document.getElementById('searchResult');
-if(filtered.length==0){box.innerHTML=`<p style="text-align:center;color:red;padding:10px">No result for ${f}<br><small style="color:#666">Total records: ${allHistory.length}</small></p>`;return;}
-let h=`<div style="font-weight:bold;margin:8px 0;text-align:center">Result for ${f} (${filtered.length})</div><table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr>`;
-filtered.forEach(r=>{h+=`<tr><td>${r.date}</td><td>${r.time}</td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td></tr>`});
-h+=`</table>`;box.innerHTML=h;
-}
+window.searchByDate=()=>{let inp=document.getElementById('dateInput').value;if(!inp)return alert("Date select karo!");let p=inp.split('-');let f=p[2]+"/"+p[1]+"/"+p[0];let fNorm=normalize(f);let filtered=allHistory.filter(x=>normalize(x.date)==fNorm);let box=document.getElementById('searchResult');if(filtered.length==0){box.innerHTML=`<p style="text-align:center;color:red;padding:10px">No result for ${f}<br><small>Total: ${allHistory.length}</small></p>`;return;}let h=`<div style="font-weight:bold;margin:8px 0;text-align:center">Result for ${f} (${filtered.length})</div><table style="width:100%;font-size:12px"><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr>`;filtered.forEach(r=>{h+=`<tr><td>${r.date}</td><td>${r.time}</td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td></tr>`});h+=`</table>`;box.innerHTML=h;}
 </script>
 </body>
 </html>

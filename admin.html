@@ -1,0 +1,6 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin</title>
+<style>body{font-family:Arial;background:#222;display:flex;justify-content:center;padding:30px}.box{background:white;padding:25px;border-radius:15px;width:100%;max-width:350px}input{width:90%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:18px}button{width:100%;padding:12px;margin-top:15px;background:#0d47a1;color:white;border:none;border-radius:8px;font-size:18px}</style>
+</head><body>
+<div class="box" id="b1"><h3>Admin Login</h3><input type="password" id="p" placeholder="Password"><button onclick="if(document.getElementById('p').value=='1329'){document.getElementById('b1').style.display='none';document.getElementById('b2').style.display='block'}else{alert('Galat') }">LOGIN</button></div>
+<div class="box" id="b2" style="display:none"><h3>Result Daalo</h3><input id="r" placeholder="Ex: 6470"><button onclick="localStorage.setItem('myres',document.getElementById('r').value);alert('Ho gaya save! '+document.getElementById('r').value)">SAVE KARO</button></div>
+</body></html>

@@ -1,1 +1,38 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PUNJAB 15 LIVE</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial Black}body{background:#000;color:#fff;text-align:center}.h{background:#ffcc00;color:#000;padding:12px;font-size:20px}.box{border:3px solid #ffcc00;margin:15px;border-radius:15px;padding:20px;background:#111}.t{color:#ffcc00;font-size:16px;margin:8px}.r{display:flex;justify-content:center;gap:12px;margin:15px 0}.rb{background:#ffcc00;color:#000;width:85px;height:85px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;font-size:13px}.rb span{font-size:30px}.hist{margin:15px;border:1px solid #333;border-radius:10px;padding:12px;background:#0a0a0a;text-align:left}.hi{border-bottom:1px solid #222;padding:7px 0;display:flex;justify-content:space-between;font-family:Arial;font-size:13px}.hi b{color:#ffcc00}</style></head><body><div class="h">🏆 PUNJAB 15 - LIVE (9AM-9PM) 🏆</div><div class="box"><div id="date" style="color:#aaa;font-family:Arial;font-size:13px">Loading...</div><div class="t">Next: <span id="cd">--:--</span> | <span id="nt">--:--</span></div><div class="r"><div class="rb">A=<span id="a">--</span></div><div class="rb">B=<span id="b">--</span></div><div class="rb">C=<span id="c">--</span></div></div><div style="color:#aaa;font-family:Arial;font-size:13px">Live: <span id="lt">--</span> | Result: <span id="rt">--</span></div><div id="st" style="color:#0f0;margin-top:8px;font-family:Arial;font-size:12px">● LIVE</div></div><div class="hist"><div style="color:#ffcc00">📋 TODAY RECORD</div><div id="hl" style="font-family:Arial;margin-top:8px">Loading...</div></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";const c={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"},app=initializeApp(c),db=getDatabase(app);function upd(){let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15;if(nm>=60)nm=0;let d=(nm-m-1)*60+(60-s);if(d<0)d+=3600;document.getElementById('cd').innerText=String(Math.floor(d/60)).padStart(2,'0')+":"+String(d%60).padStart(2,'0');let nh=n.getHours(),nmm=nm;if(nm==0)nh++;if(nh>=24)nh=0;let ap=nh>=12?'pm':'am',hh=nh%12||12;document.getElementById('nt').innerText=String(hh).padStart(2,'0')+":"+String(nmm).padStart(2,'0')+" "+ap;document.getElementById('lt').innerText=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}setInterval(upd,1000);upd();onValue(ref(db,'live/result'),s=>{let d=s.val();if(!d)return;if(d.a!==void 0){document.getElementById('a').innerText=d.a;document.getElementById('b').innerText=d.b;document.getElementById('c').innerText=d.c}else if(d.number){let p=d.number.match(/\d+/g);if(p&&p.length>=3){document.getElementById('a').innerText=p[0];document.getElementById('b').innerText=p[1];document.getElementById('c').innerText=p[2]}else{document.getElementById('a').innerText=d.number}}document.getElementById('rt').innerText=d.time||"--";document.getElementById('date').innerText=d.date||""});onValue(ref(db,'history'),s=>{let l=document.getElementById('hl'),d=s.val();if(!d){l.innerHTML="No Record";return}let a=Object.values(d).reverse(),h="";a.slice(0,30).forEach(i=>{if(i.a!==void 0)h+=`<div class=hi><span><b>A=${i.a} B=${i.b} C=${i.c}</b></span><span>${i.time}</span></div>`;else h+=`<div class=hi><span><b>${i.number}</b></span><span>${i.time}</span></div>`});l.innerHTML=h})</script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PUNJAB15</title>
+<style>
+body{background:#000;color:#fff;text-align:center;font-family:Arial Black;margin:0}
+img{width:100%;max-width:420px;border:3px solid gold;border-radius:15px;margin:15px auto;display:block}
+.h{background:gold;color:#000;padding:12px;font-size:20px}
+.box{border:3px solid gold;margin:15px;padding:15px;border-radius:15px;background:#111}
+#cd{font-size:55px;background:gold;color:#000;padding:10px;border-radius:12px;margin:10px}
+#nt{font-size:22px;margin:5px}
+.rb{display:inline-flex;flex-direction:column;justify-content:center;background:gold;color:#000;width:90px;height:90px;border-radius:12px;margin:5px}
+.rb span{font-size:32px}
+.hist{margin:15px;border:1px solid #333;border-radius:10px;padding:10px;background:#0a0a0a;text-align:left;font-family:Arial;font-size:13px}
+.hi{border-bottom:1px solid #222;padding:8px 0;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<img src="IMG-20261001-WA8057.jpg">
+<div class="h">🏆 PUNJAB 15 LIVE 🏆</div>
+<div class="box">
+<div id="cd">--:--</div>
+<div id="nt">--:-- BAJE</div>
+<div style="margin:10px 0"><div class="rb">A=<span id="a">--</span></div><div class="rb">B=<span id="b">--</span></div><div class="rb">C=<span id="c">--</span></div></div>
+<div style="color:#aaa;font-family:Arial;font-size:12px">Live: <span id="lt"></span></div>
+</div>
+<div class="hist"><div style="color:gold;font-family:Arial Black">📋 TODAY RECORD (Time ke saath)</div><div id="hl">Loading...</div></div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const c={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
+const a=initializeApp(c),db=getDatabase(a);
+function u(){let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15;if(nm>=60)nm=0;let d=(nm-m-1)*60+(60-s);if(d<0)d+=3600;document.getElementById('cd').innerText=String(Math.floor(d/60)).padStart(2,'0')+":"+String(d%60).padStart(2,'0');let nh=n.getHours();if(nm==0)nh++;if(nh>=24)nh=0;let ap=nh>=12?'pm':'am',hh=nh%12||12;document.getElementById('nt').innerText=hh+":"+String(nm).padStart(2,'0')+" "+ap+" BAJE";document.getElementById('lt').innerText=n.toLocaleTimeString('en-IN')}setInterval(u,1000);u();
+onValue(ref(db,'live/result'),s=>{let d=s.val();if(!d)return;document.getElementById('a').innerText=d.a;document.getElementById('b').innerText=d.b;document.getElementById('c').innerText=d.c});
+onValue(ref(db,'history'),s=>{let e=document.getElementById('hl'),d=s.val();if(!d)return;let v=Object.values(d).reverse(),h="";v.slice(0,40).forEach(i=>{h+=`<div class=hi><span><b>A=${i.a} B=${i.b} C=${i.c}</b></span><span style="color:#aaa">${i.time||""} ${i.date||""}</span></div>`});e.innerHTML=h});
+</script>
+</body>
+</html>

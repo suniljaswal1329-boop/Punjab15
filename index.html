@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Punjab15 - Live Result</title>
+<style>
+body{font-family:Arial;background:#f0f4ff;margin:0;padding:20px;text-align:center}
+.box{max-width:400px;margin:auto;background:white;border-radius:20px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.1);border-top:6px solid #0d47a1}
+.timer{font-size:60px;font-weight:900;color:#d32f2f;background:#fff5f5;border:2px dashed #d32f2f;border-radius:15px;padding:10px;margin:15px 0}
+.result-box{background:#0d47a1;color:white;padding:20px;border-radius:15px;margin-top:15px}
+.result{font-size:38px;font-weight:bold;letter-spacing:2px}
+.btn{background:#2e7d32;color:white;padding:12px 20px;border-radius:10px;text-decoration:none;display:inline-block;margin-top:15px}
+</style>
+</head>
+<body>
+<div class="box">
+<h2 style="margin:0;color:#0d47a1">PUNJAB15 LIVE</h2>
+<p>Next Result In:</p>
+<div class="timer" id="timer">15:00</div>
+<div class="result-box">
+<div style="font-size:13px;opacity:0.8">LATEST RESULT</div>
+<div class="result" id="result">10 - 25 - 68</div>
+<div style="margin-top:10px;font-size:12px" id="updateTime"></div>
+</div>
+<p style="font-size:12px;color:gray;margin-top:15px">Refresh karke naya result dekhein</p>
+</div>
+<script>
+let timeLeft = 15 * 60;
+function updateTimer(){
+ let m = Math.floor(timeLeft/60);
+ let s = timeLeft%60;
+ document.getElementById('timer').innerHTML = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
+ if(timeLeft<=0){ timeLeft=15*60; } else { timeLeft--; }
+}
+setInterval(updateTimer,1000);
+document.getElementById('updateTime').innerHTML = "Updated: " + new Date().toLocaleTimeString();
+</script>
+</body>
+</html>

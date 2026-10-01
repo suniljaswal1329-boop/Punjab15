@@ -23,33 +23,26 @@ body{font-family:Arial;background:#eef3ff;margin:0;padding:15px;display:flex;jus
 <div id="tlabel" style="font-size:12px;margin-top:5px"></div>
 </div>
 <button class="btn" onclick="location.reload()">Refresh</button>
-<p style="font-size:11px;color:gray">Har 15 min (00,15,30,45) par result change. Sabke phone me same time.</p>
 </div>
 <script>
 function getNextSlot(){
-  let now=new Date();
-  let next=new Date(now);
-  next.setSeconds(0,0);
-  let m=now.getMinutes();
-  let nextM=Math.ceil((m+now.getSeconds()/60)/15)*15;
-  if(nextM>=60){next.setHours(now.getHours()+1);next.setMinutes(0);}
-  else{next.setMinutes(nextM);}
+  let now=new Date();let next=new Date(now);next.setSeconds(0,0);
+  let m=now.getMinutes();let nextM=Math.ceil((m+now.getSeconds()/60)/15)*15;
+  if(nextM>=60){next.setHours(now.getHours()+1);next.setMinutes(0);}else{next.setMinutes(nextM);}
   return next;
 }
 let nextSlot=getNextSlot();
 function updateTimer(){
-  let now=new Date();
-  let diff=nextSlot-now;
+  let now=new Date();let diff=nextSlot-now;
   if(diff<=0){
     document.getElementById('res').innerText=Math.floor(1000+Math.random()*9000);
     document.getElementById('tlabel').innerText="Updated: "+now.toLocaleTimeString();
-    nextSlot=getNextSlot(); return;
+    nextSlot=getNextSlot();return;
   }
-  let mm=Math.floor(diff/60000);
-  let ss=Math.floor((diff%60000)/1000);
+  let mm=Math.floor(diff/60000);let ss=Math.floor((diff%60000)/1000);
   document.getElementById('timer').innerText=(mm<10?'0':'')+mm+":"+(ss<10?'0':'')+ss;
 }
-setInterval(updateTimer,1000); updateTimer();
+setInterval(updateTimer,1000);updateTimer();
 </script>
 </body>
 </html>

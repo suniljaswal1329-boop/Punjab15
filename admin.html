@@ -5,63 +5,81 @@
 <title>Admin - SUPER LOTTO</title>
 <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{background:#111;font-family:Arial;padding:12px;color:#fff}
-.header{text-align:center;padding:16px;border-radius:14px;border:2px solid #facc15;background:#000;margin-bottom:12px}
-.header h1{font-family:'Righteous',cursive;font-size:36px;background:linear-gradient(#fde047,#facc15,#eab308);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.login{max-width:400px;margin:80px auto;background:#fff;color:#111;padding:20px;border-radius:14px;text-align:center}
-.card{background:#fff;color:#111;border-radius:14px;padding:14px;margin-bottom:12px}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:18px;text-align:center;font-weight:900;margin-bottom:8px}
-.btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:900;font-size:16px;cursor:pointer}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#111;font-family:Arial;padding:10px;color:#fff}
+.header{text-align:center;padding:14px;border-radius:14px;border:2px solid #facc15;background:#000;margin-bottom:10px}
+.header h1{font-family:'Righteous',cursive;font-size:34px;color:#facc15}
+.timer{text-align:center;background:#fff;color:#111;padding:14px;border-radius:14px;margin-bottom:10px;border:2px solid #facc15}
+.timer b{font-size:38px;display:block;color:#111}
+.card{background:#fff;color:#111;border-radius:14px;padding:12px;margin-bottom:10px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;text-align:center;font-weight:900;margin-bottom:8px}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:900;font-size:15px;cursor:pointer}
 .save{background:#111;color:#facc15}.del{background:#ef4444;color:#fff;margin-top:8px}
 .grid{display:flex;gap:8px}.grid input{flex:1}
-.timer{text-align:center;background:#fff;color:#111;padding:12px;border-radius:12px;margin-bottom:12px} .timer b{font-size:30px;color:#111}
 .list{background:#fff;color:#111;border-radius:14px;padding:10px}
 </style>
 </head>
 <body>
-<div id="loginDiv" class="login"><h2>ADMIN LOGIN</h2><br><input type="password" id="pass" placeholder="Password"><button class="btn save" onclick="login()">LOGIN</button><p style="font-size:11px;margin-top:8px">Pass: 1234</p></div>
-<div id="adminDiv" style="display:none">
-<div class="header"><h1>SUPER LOTTO</h1></div>
-<div class="timer"><div>NEXT RESULT IN</div><b id="timer">00:00:00</b><div style="font-size:13px;margin-top:6px">Fix Slot: <b id="slot" style="color:#eab308">--:--</b> | <span id="date"></span></div><div style="font-size:11px;color:#666;margin-top:4px">Aap 9:17 pe daloge to bhi 9:15 hi save hoga</div></div>
-<div class="card"><div class="grid"><input id="a" placeholder="A"><input id="b" placeholder="B"><input id="c" placeholder="C"></div><button class="btn save" onclick="saveLive()">SAVE RESULT</button><button class="btn del" onclick="deleteAll()">DELETE ALL HISTORY (Aaj ke liye)</button></div>
-<div class="list" id="history"></div>
+<div class="header"><h1>SUPER LOTTO</h1><div style="font-size:11px;color:#aaa">ADMIN - ALL IN ONE</div></div>
+
+<div class="timer">
+<div style="font-size:12px;color:#666">NEXT DRAW IN</div>
+<b id="timer">00:00:00</b>
+<div style="margin-top:6px;font-size:14px">Save Slot: <b id="slot" style="color:#b78c00">--:--</b> | <span id="date"></span></div>
 </div>
+
+<div class="card">
+<input type="password" id="pass" placeholder="Password = 1234">
+<div class="grid"><input id="a" placeholder="A"><input id="b" placeholder="B"><input id="c" placeholder="C"></div>
+<button class="btn save" onclick="saveLive()">SAVE RESULT</button>
+<button class="btn del" onclick="deleteAll()">DELETE ALL HISTORY</button>
+<p style="font-size:10px;color:#666;text-align:center;margin-top:6px">9:17 pe save karoge to 9:15 hi save hoga + purana auto hatega</p>
+</div>
+
+<div class="list" id="history">Loading history...</div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getDatabase,ref,set,remove,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
 const app=initializeApp(cfg),db=getDatabase(app);
-window.login=()=>{if(document.getElementById('pass').value==="1234"){document.getElementById('loginDiv').style.display='none';document.getElementById('adminDiv').style.display='block';}else alert("Wrong Pass");};
+
 function getFixedSlot(){
  let now=new Date();
- let mins=now.getMinutes();
- let fixedMins=Math.floor(mins/15)*15; // YEHI MAIN LOGIC HAI - 17 -> 15
- let d=new Date(now); d.setMinutes(fixedMins); d.setSeconds(0); d.setMilliseconds(0);
+ let fixed=Math.floor(now.getMinutes()/15)*15;
+ let d=new Date(now); d.setMinutes(fixed); d.setSeconds(0); d.setMilliseconds(0);
  let h=d.getHours(); let ap=h>=12?'PM':'AM'; let hr=h%12||12;
- let timeStr=String(hr).padStart(2,'0')+":"+String(fixedMins).padStart(2,'0')+" "+ap.toLowerCase();
+ let timeStr=String(hr).padStart(2,'0')+":"+String(fixed).padStart(2,'0')+" "+ap.toLowerCase();
  let dateStr=String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
- return {dateStr,timeStr,fullDate:d,now:now,hour:h};
+ return {dateStr,timeStr,fullDate:d,now,hour:h};
 }
 function tick(){
  let s=getFixedSlot();
- document.getElementById('slot').innerText=s.timeStr; document.getElementById('date').innerText=s.dateStr;
- let n=s.now, m=n.getMinutes(), sec=n.getSeconds();
- let nm=Math.ceil((m+1)/15)*15, nh=n.getHours(); if(nm>=60){nm=0;nh++;}
- let diff=(nm-m-1)*60+(60-sec); if(diff<0)diff+=15*60;
- let hh=Math.floor(diff/3600),mm=Math.floor((diff%3600)/60),ss=diff%60;
- document.getElementById('timer').innerText=String(hh).padStart(2,'0')+":"+String(mm).padStart(2,'0')+":"+String(ss).padStart(2,'0');
+ document.getElementById('slot').innerText=s.timeStr;
+ document.getElementById('date').innerText=s.dateStr;
+ let next=new Date(s.fullDate); next.setMinutes(next.getMinutes()+15);
+ let diff=Math.floor((next - s.now)/1000); if(diff<0) diff=0;
+ let m=Math.floor(diff/60), sec=diff%60;
+ document.getElementById('timer').innerText="00:"+String(m).padStart(2,'0')+":"+String(sec).padStart(2,'0');
 }
 setInterval(tick,1000); tick();
+
 window.saveLive=async()=>{
+ if(document.getElementById('pass').value!=="1234") return alert("Wrong Password!");
  let a=document.getElementById('a').value.trim(),b=document.getElementById('b').value.trim(),c=document.getElementById('c').value.trim();
- if(!a||!b||!c)return alert("A B C bharo");
- let s=getFixedSlot(); if(s.hour<9||s.hour>=21)return alert("9AM to 9PM only allowed!");
+ if(!a||!b||!c) return alert("A B C bharo");
+ let s=getFixedSlot();
+ if(s.hour<9||s.hour>=21) return alert("9AM-9PM only!");
  let key=s.dateStr.replaceAll("/","-")+"_"+s.timeStr.replaceAll(" ","").replaceAll(":","-");
+ await remove(ref(db,'live/result'));
  await set(ref(db,'live/result'),{a,b,c,date:s.dateStr,time:s.timeStr,timestamp:Date.now()});
  await set(ref(db,'history/'+key),{a,b,c,date:s.dateStr,time:s.timeStr,timestamp:Date.now()});
- alert("Saved as "+s.timeStr+" (Fix Slot)");
+ alert("Saved: "+s.timeStr);
+ document.getElementById('a').value="";document.getElementById('b').value="";document.getElementById('c').value="";
 };
-window.deleteAll=async()=>{if(confirm("Saara history delete?")){await remove(ref(db,'history')); alert("All Deleted - Ab shuru se daalo");}};
+window.deleteAll=async()=>{
+ if(document.getElementById('pass').value!=="1234") return alert("Password daalo!");
+ if(confirm("Delete all history?")){await remove(ref(db,'history')); alert("Deleted");}
+};
 onValue(ref(db,'history'),snap=>{
  let h=document.getElementById('history'); h.innerHTML="<b>History</b><br><br>";
  let arr=[]; snap.forEach(c=>arr.push(c.val())); arr.sort((x,y)=>y.timestamp-x.timestamp);

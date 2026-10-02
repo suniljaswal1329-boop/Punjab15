@@ -2,58 +2,76 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SUPER LOTTO Live Result Today</title>
+<title>SUPER LOTTO - Fast Result</title>
 <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#f5f5f5;font-family:Arial;padding:10px}
-.header{background:linear-gradient(135deg,#111,#333);text-align:center;padding:18px;border-radius:14px;border:2px solid #facc15}
-.header h1{font-family:'Righteous',cursive;font-size:38px;background:linear-gradient(#fde047,#facc15,#eab308);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 12px #facc15aa);letter-spacing:2px}
-.header p{color:#aaa;margin-top:4px;font-size:12px}
-.timerBox{background:#fff;border-radius:14px;padding:12px;text-align:center;margin:12px 0;box-shadow:0 2px 8px #0001}
-.timerBox b{font-size:32px;color:#111}
-.date{font-size:12px;background:#111;color:#facc15;padding:4px 10px;border-radius:20px}
-.liveGrid{display:flex;gap:10px;justify-content:center;margin:14px 0}
-.box{flex:1;max-width:110px;height:90px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900}
-.box span{font-size:11px;opacity:.9}.box b{font-size:28px}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0a;color:#fff;font-family:Arial;padding:10px}
+.hdr{text-align:center;background:#000;border:2px solid #facc15;border-radius:14px;padding:14px;margin-bottom:10px}
+.hdr h1{font-family:'Righteous',cursive;font-size:38px;color:#facc15}
+.timer{background:#fff;color:#111;border-radius:12px;padding:10px;text-align:center;margin-bottom:10px}
+.timer b{font-size:32px}
+.live{background:#fff;color:#111;border-radius:14px;padding:14px;text-align:center;margin-bottom:10px}
+.balls{display:flex;justify-content:center;gap:12px;margin-top:10px}
+.ball{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#fff}
 .a{background:#ef4444}.b{background:#a855f7}.c{background:#22c55e}
-#history{background:#fff;border-radius:14px;padding:10px;margin-top:12px}
-.hItem{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:8px 0;font-size:13px}
-.r{display:flex;gap:6px}.r i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-weight:900;font-size:12px}
-.searchBox{display:flex;gap:6px;margin:10px 0}
-.searchBox input{flex:1;padding:10px;border-radius:10px;border:1px solid #ddd}
-.searchBox button{padding:10px 14px;border-radius:10px;border:0;background:#111;color:#facc15;font-weight:900}
+.refresh{width:100%;padding:14px;border-radius:12px;border:2px solid #facc15;background:#111;color:#facc15;font-weight:900;font-size:16px;cursor:pointer;margin-bottom:10px}
+.refresh:active{transform:scale(0.97)}
+.hist{background:#fff;color:#111;border-radius:14px;padding:10px}
+.row{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid #eee;font-size:13px}
+.badge{display:flex;gap:6px}.badge i{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-weight:900;font-size:11px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SUPER LOTTO</h1><p>★ LIVE RESULT EVERY 15 MINUTES ★</p></div>
-<div class="timerBox"><div>NEXT RESULT IN</div><b id="timer">--:--:--</b><div style="margin-top:6px"><span class="date" id="date">--/--/----</span> <span class="date" id="time">--:-- --</span></div></div>
-<div class="liveGrid"><div class="box a"><span>A</span><b id="vA">--</b></div><div class="box b"><span>B</span><b id="vB">--</b></div><div class="box c"><span>C</span><b id="vC">--</b></div></div>
-<div class="searchBox"><input type="date" id="sDate"><button onclick="searchDate()">Search Previous Dates</button></div>
-<div id="history"></div>
+<div class="hdr"><h1>SUPER LOTTO</h1><div style="font-size:11px;color:#aaa">PUNJAB STATE FAST RESULT (9AM-9PM)</div></div>
+<div class="timer"><div style="font-size:12px">NEXT DRAW IN</div><b id="timer">00:00:00</b><div style="font-size:12px;margin-top:4px">Next: <span id="slot">--:--</span> | <span id="date"></span></div></div>
+<div class="live">
+<div style="font-size:12px;color:#666">LIVE RESULT</div>
+<div style="font-size:13px;margin-top:4px"><span id="live-date">--/--/----</span> <span id="live-time">--:--</span></div>
+<div class="balls"><div class="ball a" id="live-a">-</div><div class="ball b" id="live-b">-</div><div class="ball c" id="live-c">-</div></div>
+</div>
+<button class="refresh" id="refBtn" onclick="refreshResult()">🔄 REFRESH RESULT</button>
+<div class="hist" id="history">Loading...</div>
+
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getDatabase,ref,onValue,get}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
 const app=initializeApp(cfg),db=getDatabase(app);
-function fmt(d){return String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();}
-function norm(s){if(!s)return"";let p=s.split("/");if(p.length!=3)return s.trim();return p[0].padStart(2,'0')+"/"+p[1].padStart(2,'0')+"/"+p[2];}
-let all=[];
-function tick(){let n=new Date(),m=n.getMinutes(),s=n.getSeconds(),nm=Math.ceil((m+1)/15)*15,nh=n.getHours();if(nm>=60){nm=0;nh++;}if(nh>=24)nh=0;let diff=(nm-m-1)*60+(60-s);if(diff<0)diff+=3600;let hh=Math.floor(diff/3600),mm2=Math.floor((diff%3600)/60),ss=diff%60;document.getElementById('timer').innerText=String(hh).padStart(2,'0')+":"+String(mm2).padStart(2,'0')+":"+String(ss).padStart(2,'0');let ap=nh>=12?'PM':'AM',dh=nh%12||12;document.getElementById('date').innerText=fmt(n);document.getElementById('time').innerText=String(dh).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap;}
-setInterval(tick,1000);tick();
-onValue(ref(db,'live/result'),s=>{let d=s.val();if(!d)return;document.getElementById('vA').innerText=d.a;document.getElementById('vB').innerText=d.b;document.getElementById('vC').innerText=d.c;});
-onValue(ref(db,'history'),s=>{all=[];s.forEach(c=>{all.push(c.val());});render(all);});
-function render(list){
- let h=document.getElementById('history');h.innerHTML="";
- let filtered=list.filter(r=>{
-   let t=(r.time||"").toLowerCase();let m=t.match(/(\d+):(\d+)\s*(am|pm)/);if(!m)return true;
-   let hr=parseInt(m[1]);if(m[3]=='pm'&&hr!=12)hr+=12;if(m[3]=='am'&&hr==12)hr=0;
-   return hr>=9&&hr<21;
- });
- filtered.slice().reverse().forEach(r=>{
-  h.innerHTML+=`<div class="hItem"><div>${r.date||''} ${r.time||''}</div><div class="r"><i style="background:#ef4444">${r.a}</i><i style="background:#a855f7">${r.b}</i><i style="background:#22c55e">${r.c}</i></div></div>`;
- });
+
+function getSlot(){
+ let now=new Date(); let fixed=Math.floor(now.getMinutes()/15)*15;
+ let d=new Date(now); d.setMinutes(fixed); d.setSeconds(0);
+ return {now,d,fixed};
 }
-window.searchDate=()=>{let v=document.getElementById('sDate').value;if(!v)return render(all);let d=new Date(v);let s=fmt(d);let f=all.filter(x=>norm(x.date)==norm(s));if(f.length==0)alert("No result for "+s);render(f.length?f:all);}
+function tick(){
+ let s=getSlot(); let next=new Date(s.d); next.setMinutes(next.getMinutes()+15);
+ let diff=Math.floor((next-s.now)/1000); if(diff<0)diff=0;
+ let m=Math.floor(diff/60),sec=diff%60;
+ document.getElementById('timer').innerText="00:"+String(m).padStart(2,'0')+":"+String(sec).padStart(2,'0');
+ let h=s.d.getHours(); let ap=h>=12?'PM':'AM'; let hr=h%12||12;
+ document.getElementById('slot').innerText=String(hr).padStart(2,'0')+":"+String(s.fixed).padStart(2,'0')+" "+ap.toLowerCase();
+ document.getElementById('date').innerText=String(s.d.getDate()).padStart(2,'0')+"/"+String(s.d.getMonth()+1).padStart(2,'0')+"/"+s.d.getFullYear();
+}
+setInterval(tick,1000); tick();
+
+function showLive(r){
+ document.getElementById('live-a').innerText=""; document.getElementById('live-b').innerText=""; document.getElementById('live-c').innerText="";
+ setTimeout(()=>{
+  document.getElementById('live-date').innerText=r.date; document.getElementById('live-time').innerText=r.time;
+  document.getElementById('live-a').innerText=r.a; document.getElementById('live-b').innerText=r.b; document.getElementById('live-c').innerText=r.c;
+ },100);
+}
+onValue(ref(db,'live/result'),snap=>{ if(snap.exists()) showLive(snap.val()); });
+onValue(ref(db,'history'),snap=>{
+ let h=document.getElementById('history'); h.innerHTML="<b>Today Results (15min)</b><br><br>";
+ let arr=[]; snap.forEach(c=>arr.push(c.val())); arr.sort((x,y)=>y.timestamp-x.timestamp);
+ arr.forEach(r=>{ h.innerHTML+=`<div class="row"><div>${r.date} ${r.time}</div><div class="badge"><i style="background:#ef4444">${r.a}</i><i style="background:#a855f7">${r.b}</i><i style="background:#22c55e">${r.c}</i></div></div>`; });
+});
+window.refreshResult=async()=>{
+ let btn=document.getElementById('refBtn'); btn.innerText="⏳ LOADING...";
+ let snap=await get(ref(db,'live/result')); if(snap.exists()) showLive(snap.val());
+ setTimeout(()=>{btn.innerText="🔄 REFRESH RESULT";},800);
+}
 </script>
 </body>
 </html>

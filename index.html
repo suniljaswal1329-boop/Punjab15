@@ -22,8 +22,7 @@
 <div class="live"><div style="font-size:12px;color:#666">LIVE RESULT</div><div id="liveDate" style="font-size:14px;margin-bottom:6px">--</div><div id="liveBalls"></div></div>
 
 <div class="search">
-<input id="searchBox" placeholder="Search History - jaise 09:30, 02/10, 54" onkeyup="doSearch()">
-<div style="font-size:10px;color:#888;margin-top:4px">Date ya Time ya Number search karo</div>
+<input id="searchBox" placeholder="Search History" onkeyup="doSearch()">
 </div>
 
 <div class="list"><div style="text-align:left;font-weight:900;margin-bottom:8px">Today Results (15min) - <span id="count">0</span> draws</div><div id="history"></div></div>
@@ -42,8 +41,8 @@ function tick(){
  let diff=Math.floor((next-now)/1000); if(diff<0) diff=0;
  let m=Math.floor(diff/60),s=diff%60;
  document.getElementById('timer').innerText="00:"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
- let h=d.getHours(), ap=h>=12?'PM':'AM', hr=h%12||12;
- document.getElementById('slot').innerText=String(hr).padStart(2,'0')+":"+String(fixed).padStart(2,'0')+" "+ap.toLowerCase();
+ let h=next.getHours(), ap=h>=12?'PM':'AM', hr=h%12||12, nm=next.getMinutes();
+ document.getElementById('slot').innerText=String(hr).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap.toLowerCase();
  document.getElementById('date').innerText=String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
 }
 setInterval(tick,1000); tick();
@@ -51,22 +50,4 @@ setInterval(tick,1000); tick();
 onValue(ref(db,'live/result'),snap=>{
  let v=snap.val(); if(!v) return;
  document.getElementById('liveDate').innerText=v.date+" "+v.time;
- document.getElementById('liveBalls').innerHTML=`<span class="ball" style="background:#ef4444">${v.a}</span><span class="ball" style="background:#a855f7">${v.b}</span><span class="ball" style="background:#22c55e">${v.c}</span>`;
-});
-onValue(ref(db,'history'),snap=>{
- allData=[]; snap.forEach(c=>allData.push(c.val())); allData.sort((x,y)=>y.timestamp-x.timestamp);
- render(allData);
-});
-window.render=(list)=>{
- let h=document.getElementById('history'); h.innerHTML=""; document.getElementById('count').innerText=list.length;
- list.forEach(r=>{h.innerHTML+=`<div class="row"><div>${r.date} ${r.time}</div><div><span class="ball" style="background:#ef4444;width:32px;height:32px;font-size:13px">${r.a}</span><span class="ball" style="background:#a855f7;width:32px;height:32px;font-size:13px">${r.b}</span><span class="ball" style="background:#22c55e;width:32px;height:32px;font-size:13px">${r.c}</span></div></div>`;});
-};
-window.doSearch=()=>{
- let q=document.getElementById('searchBox').value.toLowerCase();
- if(!q) return render(allData);
- let f=allData.filter(r=> (r.date+r.time+r.a+r.b+r.c).toLowerCase().includes(q));
- render(f);
-};
-</script>
-</body>
-</html>
+ document.getElementById('liveBalls').innerHTML=`<span class="ball" style="background:#ef4444">${v.a}</span><span class="ball" style="background:#a855f7">${v.b}</span>

@@ -1,1 +1,74 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SUPER LOTTO</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;font-family:Arial;padding:12px;color:#fff;max-width:500px;margin:auto}.h{text-align:center;padding:26px;border-radius:20px;border:3px solid #facc15;background:#000;margin-bottom:14px}.h h1{font-size:52px;color:#facc15;letter-spacing:2px}.b{display:inline-flex;width:80px;height:80px;border-radius:50%;color:#fff;align-items:center;justify-content:center;font-weight:900;font-size:36px;margin:6px;box-shadow:0 4px 10px rgba(0,0,0,.5)}.box{background:#fff;color:#111;border-radius:20px;padding:18px;margin-bottom:14px;text-align:center}.search input{width:100%;padding:20px;border-radius:14px;border:2px solid #ddd;text-align:center;font-weight:800;font-size:18px}.row{display:flex;justify-content:space-between;padding:14px 4px;border-bottom:1px solid #eee;align-items:center;font-weight:600}.sb{width:48px;height:48px;font-size:20px}</style></head><body><div class="h"><h1>SUPER LOTTO</h1><div style="color:#aaa;margin-top:8px;font-weight:700">PUNJAB STATE FAST RESULT (9AM-9PM)</div></div><div class="box"><div style="color:#666;font-size:13px;font-weight:700">NEXT DRAW IN</div><b id="t" style="font-size:56px;display:block;margin:6px 0">00:01:00</b><div style="font-weight:700">Next: <span id="slot">--:--</span> | <span id="d">--/--/----</span></div></div><div class="box"><div style="color:#666;font-size:13px;font-weight:700">LIVE RESULT</div><div id="ld" style="font-size:18px;margin:8px 0;font-weight:800">--</div><div id="lb"></div></div><div class="box"><input id="searchBox" placeholder="Search History" onkeyup="doSearch()" style="width:100%;padding:20px;border-radius:14px;border:2px solid #ddd;text-align:center;font-weight:800;font-size:18px"></div><div class="box"><div style="text-align:left;font-weight:900;margin-bottom:12px">Today Results (15min) - <span id="count">0</span> draws</div><div id="history"></div></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};const app=initializeApp(cfg);const db=getDatabase(app);let all=[];function tick(){try{let now=new Date();let fm=Math.floor(now.getMinutes()/15)*15;let d=new Date(now);d.setMinutes(fm);d.setSeconds(0);d.setMilliseconds(0);let next=new Date(d);next.setMinutes(next.getMinutes()+15);let diff=Math.max(0,Math.floor((next-now)/1000));let m=Math.floor(diff/60),s=diff%60;document.getElementById('t').innerText="00:"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');let h=next.getHours(),ap=h>=12?'PM':'AM',hr=h%12||12,nm=next.getMinutes();document.getElementById('slot').innerText=String(hr).padStart(2,'0')+":"+String(nm).padStart(2,'0')+" "+ap.toLowerCase();document.getElementById('d').innerText=String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();}catch(e){}}setInterval(tick,1000);tick();onValue(ref(db,'live/result'),snap=>{let v=snap.val();if(!v)return;document.getElementById('ld').innerText=(v.date||'')+" "+(v.time||'');document.getElementById('lb').innerHTML=`<span class="b" style="background:#ef4444">${v.a}</span><span class="b" style="background:#a855f7">${v.b}</span><span class="b" style="background:#22c55e">${v.c}</span>`;});onValue(ref(db,'history'),snap=>{all=[];snap.forEach(c=>all.push(c.val()));all.sort((a,b)=>b.timestamp-a.timestamp);render(all);});window.render=list=>{let h=document.getElementById('history');h.innerHTML="";document.getElementById('count').innerText=list.length;if(list.length==0){h.innerHTML='<div style="padding:20px;color:#888">No results yet. Add from admin.html</div>';return;}list.forEach(r=>{h.innerHTML+=`<div class="row"><div>${r.date} ${r.time}</div><div><span class="b sb" style="background:#ef4444">${r.a}</span><span class="b sb" style="background:#a855f7">${r.b}</span><span class="b sb" style="background:#22c55e">${r.c}</span></div></div>`;});};window.doSearch=()=>{let q=document.getElementById('searchBox').value.toLowerCase();if(!q)return render(all);render(all.filter(r=>(r.date+r.time+r.a+r.b+r.c).toLowerCase().includes(q)));};<\/script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUPER LOTTO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;padding:12px;font-family:Arial;max-width:500px;margin:auto;color:#fff}
+.h{background:#000;border:3px solid #facc15;border-radius:20px;text-align:center;padding:24px;margin-bottom:12px}
+.h h1{color:#facc15;font-size:48px}
+.b{display:inline-flex;width:70px;height:70px;border-radius:50%;color:#fff;align-items:center;justify-content:center;font-weight:900;font-size:30px;margin:5px}
+.box{background:#fff;color:#000;border-radius:20px;padding:16px;margin-bottom:12px;text-align:center}
+input{width:100%;padding:16px;border-radius:12px;border:2px solid #ddd;text-align:center;font-weight:700}
+.row{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #eee;align-items:center}
+</style>
+</head>
+<body>
+
+<div class="h"><h1>SUPER LOTTO</h1><div style="color:#aaa;margin-top:6px">PUNJAB STATE FAST RESULT</div></div>
+
+<div class="box">
+<div style="font-size:12px;color:#666">NEXT DRAW IN</div>
+<b id="timer" style="font-size:50px">00:00:00</b>
+<div>Next: <span id="slot">--:--</span> | <span id="date">--/--/----</span></div>
+</div>
+
+<div class="box">
+<div id="liveDate">--</div>
+<div id="liveBalls"></div>
+</div>
+
+<div class="box"><input id="s" placeholder="Search History" onkeyup="search()"></div>
+
+<div class="box"><div style="text-align:left;font-weight:800">Today - <span id="c">0</span> draws</div><div id="list"></div></div>
+
+<script>
+// SIMPLE TIMER - YEH PAKKA CHALEGA
+function runTimer(){
+let now = new Date();
+let m = now.getMinutes();
+let fixed = Math.floor(m/15)*15;
+let d = new Date(now);
+d.setMinutes(fixed);
+d.setSeconds(0);
+let next = new Date(d);
+next.setMinutes(next.getMinutes()+15);
+let diff = Math.floor((next - now)/1000);
+if(diff<0) diff=0;
+let mm = Math.floor(diff/60);
+let ss = diff%60;
+document.getElementById('timer').innerText = "00:" + String(mm).padStart(2,'0') + ":" + String(ss).padStart(2,'0');
+let hh = next.getHours();
+let ap = hh>=12?'PM':'AM';
+let hr = hh%12||12;
+document.getElementById('slot').innerText = String(hr).padStart(2,'0')+":"+String(next.getMinutes()).padStart(2,'0')+" "+ap;
+document.getElementById('date').innerText = String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
+}
+setInterval(runTimer,1000);
+runTimer();
+</script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
+const app=initializeApp(cfg);const db=getDatabase(app);let all=[];
+onValue(ref(db,'live/result'),s=>{let v=s.val();if(!v)return;document.getElementById('liveDate').innerText=v.date+" "+v.time;document.getElementById('liveBalls').innerHTML=`<span class="b" style="background:#ef4444">${v.a}</span><span class="b" style="background:#a855f7">${v.b}</span><span class="b" style="background:#22c55e">${v.c}</span>`;});
+onValue(ref(db,'history'),s=>{all=[];s.forEach(c=>all.push(c.val()));all.sort((a,b)=>b.timestamp-a.timestamp);show(all);});
+window.show=l=>{let h=document.getElementById('list');h.innerHTML="";document.getElementById('c').innerText=l.length;if(l.length==0){h.innerHTML="No results yet";return;}l.forEach(r=>{h.innerHTML+=`<div class="row"><div>${r.date} ${r.time}</div><div><span class="b" style="width:40px;height:40px;font-size:16px;background:#ef4444">${r.a}</span><span class="b" style="width:40px;height:40px;font-size:16px;background:#a855f7">${r.b}</span><span class="b" style="width:40px;height:40px;font-size:16px;background:#22c55e">${r.c}</span></div></div>`;});};
+window.search=()=>{let q=document.getElementById('s').value.toLowerCase();if(!q)return show(all);show(all.filter(r=>(r.date+r.time+r.a+r.b+r.c).toLowerCase().includes(q)));};
+</script>
+
+</body>
+</html>

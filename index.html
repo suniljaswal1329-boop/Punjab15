@@ -19,7 +19,7 @@ h1{font-size:32px;margin:10px 0 0}
 table{width:100%;background:#fff;border-collapse:collapse;border-radius:15px;overflow:hidden}
 th,td{padding:10px;border-bottom:1px solid #eee;text-align:center;font-size:14px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:99}
-.modalBox{background:#fff;padding:20px;border-radius:15px;width:90%;max-width:400px}
+.modalBox{background:#fff;padding:20px;border-radius:15px;width:90%;max-width:400px;max-height:85vh;overflow-y:auto}
 input{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px}
 </style>
 </head>
@@ -79,13 +79,12 @@ function tick(){
 }
 setInterval(tick,1000); tick();
 
-// HISTORY BUTTON FIX - ONLY THIS IS NEW
 function openHistory(){ histModal.style.display='flex'; histDate.value=dk(Date.now()); searchHistory(); }
 function closeHistory(){ histModal.style.display='none'; }
 function searchHistory(){
   let d=histDate.value; if(!d){histResult.innerHTML='Date chuno';return}
   db.ref('results').once('value',s=>{
-    let h=''; s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==d) h+=`<div style="border-bottom:1px solid #eee;padding:8px">${r.timeLabel} - <b>${p(r.a)} ${p(r.b)} ${p(r.c)}</b></div>`;});
+    let h=''; s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==d) h+=`<div style="border-bottom:1px solid #eee;padding:10px;display:flex;justify-content:space-between"><span>${r.timeLabel}</span><span>A:<b>${p(r.a)}</b> &nbsp; B:<b>${p(r.b)}</b> &nbsp; C:<b>${p(r.c)}</b></span></div>`;});
     histResult.innerHTML=h||'<div>No results for this date</div>';
   });
 }

@@ -34,7 +34,7 @@ input{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px}
 <div><div class="ball b2" id="nb">--</div><div>B</div></div>
 <div><div class="ball b3" id="nc">--</div><div>C</div></div>
 </div>
-<div>NEXT RESULT IN</div>
+<div id="nextLabel">NEXT RESULT IN</div>
 <div class="timer" id="timer">00:00:00</div>
 <button class="btn" onclick="openHistory()">🗓️ Search</button>
 </div>
@@ -72,10 +72,23 @@ db.ref('results').on('value',s=>{
   list.innerHTML=h||'<tr><td colspan=5>No results today</td></tr>';
 });
 function tick(){
-  let now=new Date(); let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15;
+  let now=new Date(); let h=now.getHours(), m=now.getMinutes();
+  // CLOSED: 10:00 PM to 8:45 AM
+  let isClosed = h>=22 || h<8 || (h==8 && m<45);
+  if(isClosed){
+    let target=new Date(now); target.setHours(8,45,0,0);
+    if(now>=target) target.setDate(target.getDate()+1);
+    let diff=target-now;
+    let hh=Math.floor(diff/3600000), mm=Math.floor(diff%3600000/60000), ss=Math.floor(diff%60000/1000);
+    document.getElementById('nextLabel').textContent='CLOSED - STARTS AT 8:45 AM IN';
+    timer.textContent=p(hh)+':'+p(mm)+':'+p(ss);
+    return;
+  }
+  document.getElementById('nextLabel').textContent='NEXT RESULT IN';
+  let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15;
   let target=new Date(now); if(next>=60){target.setHours(target.getHours()+1);next=0;} target.setMinutes(next,0,0);
-  let diff=target-now; let h=Math.floor(diff/3600000), m=Math.floor(diff%3600000/60000), s=Math.floor(diff%60000/1000);
-  timer.textContent=p(h)+':'+p(m)+':'+p(s);
+  let diff=target-now; let hh=Math.floor(diff/3600000), mm=Math.floor(diff%3600000/60000), ss=Math.floor(diff%60000/1000);
+  timer.textContent=p(hh)+':'+p(mm)+':'+p(ss);
 }
 setInterval(tick,1000); tick();
 

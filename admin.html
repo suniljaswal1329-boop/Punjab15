@@ -1,104 +1,40 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SUPER LOTTO - ADMIN</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#111;padding:14px}
-.header{background:#000;border:2px solid #facc15;border-radius:16px;text-align:center;padding:18px 10px}
-.header h1{color:#facc15;font-size:34px;font-weight:900;letter-spacing:1px}
-.header p{color:#888;font-size:12px;letter-spacing:2px;margin-top:2px}
-.card{background:#fff;border-radius:16px;padding:18px;margin-top:14px;border:2px solid #facc15}
-.card h2{text-align:center;font-size:14px;color:#666;letter-spacing:1px}
-#timer{text-align:center;font-size:44px;font-weight:800;margin:4px 0}
-#slot{text-align:center;font-size:38px;font-weight:800;color:#b58900}
-#dateTxt{text-align:center;font-size:16px;margin-top:4px}
-input{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin-top:10px;text-align:center}
-.row{display:flex;gap:10px}
-.row input{font-size:22px;font-weight:800}
-.btn{background:#000;color:#facc15;border:0;width:100%;padding:16px;border-radius:12px;font-size:18px;font-weight:800;margin-top:12px;cursor:pointer}
-.del{background:#ef4444;color:#fff}
-.note{text-align:center;color:#666;font-size:12px;margin-top:10px}
-.hist{background:#fff;border-radius:16px;padding:16px;margin-top:14px}
-.hist h3{font-size:18px;margin-bottom:10px}
-.hist div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:15px}
-</style>
-</head>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin - Punjab15</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>body{font-family:Arial;background:#111;color:#fff;padding:20px}button{padding:12px;margin:5px;border:0;border-radius:8px;font-weight:700;cursor:pointer} .green{background:#22c55e}.yellow{background:#facc15}.red{background:#ef4444;color:#fff}.card{background:#222;padding:15px;border-radius:12px;margin:10px 0}</style></head>
 <body>
-<div class="header"><h1>SUPER LOTTO</h1><p>ADMIN - ALL IN ONE</p></div>
-<div class="card">
-<h2>NEXT DRAW IN</h2><div id="timer">00:00:00</div>
-<div>Save Slot:</div><div id="slot">--:--</div><div id="dateTxt">--/--/----</div>
-<input type="password" id="pass" placeholder="Password (1234)">
-<div class="row"><input id="a" maxlength="2" placeholder="A"><input id="b" maxlength="2" placeholder="B"><input id="c" maxlength="2" placeholder="C"></div>
-<button class="btn" onclick="saveLive()">SAVE RESULT</button>
-<button class="btn del" onclick="deleteAll()">DELETE ALL HISTORY</button>
-<p class="note">9:17 pe save karoge to 9:15 hi save hoga + purana auto hatega</p>
-</div>
-<div class="hist"><h3>History</h3><div id="histList">Loading...</div></div>
-
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getDatabase,ref,set,remove,onValue} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// 👇 YAHAN PURANI ADMIN WALI CFG PASTE KARO - SIRF YAHI EK JAGAH
-const cfg={
- apiKey:"AIzaSyBmW14dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",
- authDomain:"YOUR_PROJECT.firebaseapp.com",
- databaseURL:"https://YOUR_PROJECT-default-rtdb.firebaseio.com",
- projectId:"YOUR_PROJECT",
- storageBucket:"YOUR_PROJECT.appspot.com",
- messagingSenderId:"YOUR_ID",
- appId:"YOUR_APP_ID"
+<h1>Admin Panel - Punjab 15</h1>
+<button class="green" onclick="startDraw()">Start Draw</button>
+<button class="yellow" onclick="doDraw()">🎲 Random Draw</button>
+<button class="red" onclick="endDraw()">End Draw</button>
+<h2 id="res" style="font-size:28px;color:#facc15"></h2>
+<div class="card"><h3>All Tickets</h3><div id="list"></div></div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",
+  authDomain: "superlotto.firebaseapp.com",
+  databaseURL: "https://superlotto-default-rtdb.firebaseio.com",
+  projectId: "superlotto",
+  storageBucket: "superlotto.firebasestorage.app",
+  messagingSenderId: "851670105901",
+  appId: "1:851670105901:web:568c45b226b7c80f1d1da4",
+  measurementId: "G-9B7HEFN16J"
 };
-const app=initializeApp(cfg),db=getDatabase(app);
-
-function getFixedSlot(){
- let now=new Date();
- let fixed=Math.floor(now.getMinutes()/15)*15;
- let d=new Date(now); d.setMinutes(fixed); d.setSeconds(0); d.setMilliseconds(0);
- let h=d.getHours(); let ap=h>=12?'PM':'AM'; let hr=h%12||12;
- let timeStr=String(hr).padStart(2,'0')+":"+String(fixed).padStart(2,'0')+" "+ap;
- let dateStr=String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
- return {timeStr,dateStr,fullDate:d,now,hour:h};
+firebase.initializeApp(firebaseConfig); const db=firebase.database();
+function startDraw(){ db.ref('draw').set({status:'LIVE - Buying Open', winning:null, time:Date.now()}); alert('Draw Started'); }
+function endDraw(){ db.ref('draw/status').set('Draw Closed'); }
+function doDraw(){
+  let n=new Set(); while(n.size<6) n.add(Math.floor(Math.random()*49)+1);
+  let a=[...n]; document.getElementById('res').textContent = 'Winning: '+a.join(' - ');
+  db.ref('draw').update({winning:a, status:'Result Declared', time:Date.now()});
 }
-function tick(){
- let s=getFixedSlot();
- document.getElementById('slot').innerText=s.timeStr;
- document.getElementById('dateTxt').innerText="| "+s.dateStr;
- let next=new Date(s.fullDate); next.setMinutes(next.getMinutes()+15);
- let diff=Math.floor((next-s.now)/1000); if(diff<0)diff=0;
- let m=Math.floor(diff/60),sec=diff%60;
- document.getElementById('timer').innerText="00:"+String(m).padStart(2,'0')+":"+String(sec).padStart(2,'0');
-}
-setInterval(tick,1000); tick();
-
-window.saveLive=async()=>{
- if(document.getElementById('pass').value!=="1234") return alert("Wrong Password!");
- let a=document.getElementById('a').value.trim(),b=document.getElementById('b').value.trim(),c=document.getElementById('c').value.trim();
- if(!a||!b||!c) return alert("A B C bharo");
- let s=getFixedSlot();
- if(s.hour<9||s.hour>=21) return alert("9AM-9PM only!");
- let key=s.dateStr.replaceAll("/","-")+"_"+s.timeStr.replaceAll(" ","");
- await set(ref(db,'live/result'),{a,b,c,date:s.dateStr,time:s.timeStr});
- await set(ref(db,'history/'+key),{a,b,c,date:s.dateStr,time:s.timeStr});
- alert("Saved: "+s.timeStr+" - "+a+"-"+b+"-"+c);
- document.getElementById('a').value="";document.getElementById('b').value="";document.getElementById('c').value="";
-}
-window.deleteAll=async()=>{
- if(document.getElementById('pass').value!=="1234") return alert("Password dalo");
- if(!confirm("Saara history delete karna hai?")) return;
- await remove(ref(db,'history')); await remove(ref(db,'live/result'));
- alert("Deleted!");
-}
-onValue(ref(db,'history'),(snap)=>{
- let html="";
- let arr=[]; snap.forEach(ch=>{let v=ch.val();v.key=ch.key;arr.push(v)});
- arr.sort((a,b)=>b.key.localeCompare(a.key));
- arr.slice(0,20).forEach(r=>{ html+=`<div><span>${r.date} ${r.time}</span><b>${r.a} - ${r.b} - ${r.c}</b></div>` });
- document.getElementById('histList').innerHTML=html||"No history";
+db.ref('tickets').on('value', s=>{
+  let h=''; s.forEach(c=>{ let t=c.val(); h+='<div style="margin:8px 0">'+t.name+' | '+t.numbers.join(',')+' | '+t.status+' <button onclick="approve(\''+c.key+'\')">Approve</button> <button onclick="delTicket(\''+c.key+'\')" style="background:#ef4444;color:#fff">Delete</button></div>'; });
+  document.getElementById('list').innerHTML = h || 'No tickets';
 });
+function approve(k){ db.ref('tickets/'+k+'/status').set('approved'); }
+function delTicket(k){ if(confirm('Delete?')) db.ref('tickets/'+k).remove(); }
 </script>
-</body>
-</html>
+</body></html>

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SUPER LOTTO - Live Result</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
@@ -10,11 +9,11 @@ body{background:#7c3aed;min-height:100vh;padding:0 0 20px}
 .top{text-align:center;color:#fff;padding:20px 12px}
 .top h1{font-size:30px;font-weight:800}
 .top p{font-size:13px;opacity:.85;margin-top:6px}
-.card{background:#fff;border-radius:24px;padding:22px 16px 24px;text-align:center;margin:0 12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.card{background:#fff;border-radius:24px;padding:22px 16px 24px;text-align:center;margin:0 12px}
 .pill{background:#6d28d9;color:#fff;display:inline-block;padding:10px 22px;border-radius:20px;font-weight:700;font-size:15px}
 .balls{display:flex;justify-content:space-between;gap:10px;margin:22px 0 8px}
 .ball{flex:1}
-.circle{width:100%;aspect-ratio:1/1;max-width:115px;margin:0 auto;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:700;box-shadow:0 12px 22px rgba(124,58,237,.45)}
+.circle{width:100%;aspect-ratio:1/1;max-width:115px;margin:0 auto;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:700}
 .ball span{color:#666;font-weight:700;margin-top:8px;display:block;font-size:17px}
 .next{margin-top:22px;color:#666;font-size:14px;letter-spacing:1.5px;font-weight:600}
 #timer{color:#1e1b4b;font-size:42px;font-weight:800;margin-top:4px}
@@ -26,103 +25,50 @@ th,td{padding:14px 8px;text-align:center;border-bottom:1px solid #eee;font-size:
 th{background:#f9fafb;text-align:left}
 td:first-child{text-align:left}
 .num{border:1px solid #ddd;padding:4px 10px;border-radius:8px;background:#f9fafb;font-weight:600}
-.live{color:#22c55e;font-size:12px;font-weight:800}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.popup{background:#fff;border-radius:20px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;padding:20px}
+.popup h3{font-size:20px;text-align:center}
+.popup input{width:100%;padding:12px;margin:16px 0;border:1px solid #ddd;border-radius:10px;font-size:16px}
+.popup .showBtn{width:100%;background:#6d28d9;color:#fff;border:0;padding:12px;border-radius:10px;font-size:16px;font-weight:700}
+.closeBtn{background:#eee;border:0;padding:8px 16px;border-radius:20px;margin-top:12px;width:100%;cursor:pointer}
 </style>
 </head>
 <body>
-
-<div class="top">
-  <h1>SUPER LOTTO Live Result</h1>
-  <p>Result updates automatically at every interval • <span class="live">● LIVE</span></p>
-</div>
-
+<div class="top"><h1>SUPER LOTTO Live Result</h1><p>Result updates automatically at every interval • <span style="color:#22c55e;font-weight:800">● LIVE</span></p></div>
 <div class="card">
-  <div class="pill" id="resultTime">Result for 10:15 AM</div>
-  <div class="balls">
-    <div class="ball"><div class="circle" id="nA">00</div><span>A</span></div>
-    <div class="ball"><div class="circle" id="nB">49</div><span>B</span></div>
-    <div class="ball"><div class="circle" id="nC">55</div><span>C</span></div>
-  </div>
-  <div class="next">NEXT RESULT IN</div>
-  <div id="timer">00:13:53</div>
-  <button class="btn">📅 Search Previous Dates</button>
+<div class="pill" id="resultTime">Result for --:--</div>
+<div class="balls"><div class="ball"><div class="circle" id="nA">--</div><span>A</span></div><div class="ball"><div class="circle" id="nB">--</div><span>B</span></div><div class="ball"><div class="circle" id="nC">--</div><span>C</span></div></div>
+<div class="next">NEXT RESULT IN</div><div id="timer">00:00:00</div>
+<button class="btn" onclick="openPopup()">📅 Search Previous Dates</button>
 </div>
+<div class="today"><h2>🕒 Today's Results</h2><table><thead><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="historyBody"><tr><td colspan="4" style="text-align:center;color:#888">No result yet. Admin will update soon.</td></tr></tbody></table></div>
+<div class="overlay" id="popup"><div class="popup"><h3>📅 Previous Results</h3><input type="date" id="dateInput"><button class="showBtn" onclick="showPrevious()">Show Results</button><div id="prevResults"></div><button class="closeBtn" onclick="closePopup()">Close</button></div></div>
 
-<div class="today">
-  <h2>🕒 Today's Results</h2>
-  <table>
-    <thead><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead>
-    <tbody id="historyBody"></tbody>
-  </table>
-</div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,onValue} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<script>
-// 1. Ek slot ke liye fixed number banane ke liye (sabko same dikhega)
-function getNumbers(dateStr, slot){
-  let seed = dateStr + "-" + slot;
-  let h = 0;
-  for(let i=0;i<seed.length;i++){ h = (h*31 + seed.charCodeAt(i)) % 1000000; }
-  let a = (h*7 + 13) % 100;
-  let b = (h*13 + 29) % 100;
-  let c = (h*17 + 41) % 100;
-  return [String(a).padStart(2,'0'), String(b).padStart(2,'0'), String(c).padStart(2,'0')];
-}
-
-function formatTime(h,m){
-  let ampm = h>=12? 'PM':'AM';
-  let hh = h%12; if(hh===0) hh=12;
-  return hh+":"+String(m).padStart(2,'0')+" "+ampm;
-}
-
-function render(){
-  let now = new Date();
-  let dateStr = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate();
-
-  // Current slot - har 15 min
-  let totalMin = now.getHours()*60 + now.getMinutes();
-  let currentSlotMin = Math.floor(totalMin/15)*15;
-  let curH = Math.floor(currentSlotMin/60);
-  let curM = currentSlotMin%60;
-
-  // Manual fixed results jo tumne screenshot me diye the - wo same rahenge
-  let fixed = {
-    "10:15 AM":["00","49","55"],
-    "10:00 AM":["79","80","42"],
-    "09:45 AM":["55","94","78"],
-    "09:30 AM":["82","35","32"],
-    "09:15 AM":["26","40","10"],
-    "09:00 AM":["23","34","33"]
-  };
-
-  let timeStr = formatTime(curH,curM);
-  let nums = fixed[timeStr] || getNumbers(dateStr, currentSlotMin);
-
-  document.getElementById('nA').innerText = nums[0];
-  document.getElementById('nB').innerText = nums[1];
-  document.getElementById('nC').innerText = nums[2];
-  document.getElementById('resultTime').innerText = "Result for "+timeStr;
-
-  // History banayo - aaj ke sab slots
-  let rows = "";
-  for(let m = currentSlotMin; m >= Math.max(0, currentSlotMin - 15*10); m -= 15){
-    let hh = Math.floor(m/60), mm = m%60;
-    let t = formatTime(hh,mm);
-    let n = fixed[t] || getNumbers(dateStr, m);
-    rows += `<tr><td>${t}</td><td><span class="num">${n[0]}</span></td><td><span class="num">${n[1]}</span></td><td><span class="num">${n[2]}</span></td></tr>`;
-  }
-  document.getElementById('historyBody').innerHTML = rows;
-
-  // Timer - next 15 min tak countdown
-  let nextSlot = currentSlotMin + 15;
-  let diffSec = (nextSlot*60) - (now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds());
-  let hh2 = Math.floor(diffSec/3600), mm2 = Math.floor((diffSec%3600)/60), ss2 = diffSec%60;
-  document.getElementById('timer').innerText = String(hh2).padStart(2,'0')+":"+String(mm2).padStart(2,'0')+":"+String(ss2).padStart(2,'0');
-}
-
-// Har second check karo, 15 min complete hote hi auto refresh
-setInterval(render, 1000);
-render();
+// 👇 YAHI SAME CFG - ADMIN WALI HI PASTE KARO
+const cfg={
+ apiKey:"AIzaSyBmW14dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",
+ authDomain:"YOUR_PROJECT.firebaseapp.com",
+ databaseURL:"https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+ projectId:"YOUR_PROJECT",
+ storageBucket:"YOUR_PROJECT.appspot.com",
+ messagingSenderId:"YOUR_ID",
+ appId:"YOUR_APP_ID"
+};
+const app=initializeApp(cfg),db=getDatabase(app);
+let allHistory=[];
+onValue(ref(db,'live/result'),(snap)=>{let v=snap.val();if(!v)return;document.getElementById('nA').innerText=v.a;document.getElementById('nB').innerText=v.b;document.getElementById('nC').innerText=v.c;document.getElementById('resultTime').innerText="Result for "+v.time;});
+onValue(ref(db,'history'),(snap)=>{allHistory=[];snap.forEach(c=>{let val=c.val();val.key=c.key;allHistory.push(val)});allHistory.sort((a,b)=>b.key.localeCompare(a.key));let now=new Date();let todayKey=String(now.getDate()).padStart(2,'0')+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+now.getFullYear();let todays=allHistory.filter(r=>r.key.startsWith(todayKey));if(todays.length===0)todays=allHistory.slice(0,10);let rows="";todays.forEach(r=>{rows+=`<tr><td>${r.time}</td><td><span class="num">${r.a}</span></td><td><span class="num">${r.b}</span></td><td><span class="num">${r.c}</span></td></tr>`});if(rows)document.getElementById('historyBody').innerHTML=rows;});
+function updateTimer(){let now=new Date();let totalMin=now.getHours()*60+now.getMinutes();let nextSlot=Math.floor(totalMin/15)*15+15;let diffSec=(nextSlot*60)-(now.getHours()*3600+now.getMinutes()*60+now.getSeconds());let h=Math.floor(diffSec/3600),m=Math.floor((diffSec%3600)/60),s=diffSec%60;document.getElementById('timer').innerText=String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');}
+setInterval(updateTimer,1000);updateTimer();
+window.openPopup=()=>document.getElementById('popup').classList.add('show');
+window.closePopup=()=>document.getElementById('popup').classList.remove('show');
+window.showPrevious=()=>{let dateVal=document.getElementById('dateInput').value;if(!dateVal){alert("Pehle date select karo");return}let d=new Date(dateVal);let keyDate=String(d.getDate()).padStart(2,'0')+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+d.getFullYear();let res=allHistory.filter(r=>r.key.startsWith(keyDate));if(res.length===0){document.getElementById('prevResults').innerHTML="<p style='text-align:center;padding:20px;color:#888'>Is date ka koi result nahi hai</p>";return}let html=`<table><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr>`;res.reverse().forEach(r=>{html+=`<tr><td>${r.time}</td><td><span class="num">${r.a}</span></td><td><span class="num">${r.b}</span></td><td><span class="num">${r.c}</span></td></tr>`});html+=`</table>`;document.getElementById('prevResults').innerHTML=html;}
+document.getElementById('popup').addEventListener('click',e=>{if(e.target.id==='popup')closePopup();});
 </script>
-
 </body>
 </html>

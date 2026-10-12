@@ -1,92 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Punjab 15 Live Result</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:linear-gradient(180deg,#8b5cf6,#6d28d9 45%,#4c1d95);min-height:100vh;padding:15px;color:#fff}
-h1{text-align:center;font-size:30px;margin-top:15px}
-.sub{text-align:center;opacity:.85;font-size:14px;margin:6px 0 20px}
-.card{background:#fff;color:#1e293b;border-radius:28px;padding:25px 15px 28px;max-width:480px;margin:0 auto;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,.3)}
-.badge{background:#7c3aed;color:#fff;display:inline-block;padding:9px 24px;border-radius:20px;font-size:16px}
-.balls{display:flex;justify-content:space-around;margin:28px 0 5px}
-.ball{width:95px;height:95px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a78bfa,#7c3aed 55%,#4c1d95);color:#fff;font-size:31px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 25px rgba(124,58,237,.45)}
-.label{margin-top:11px;color:#64748b;font-weight:700;font-size:18px}
-.next{margin-top:28px;color:#64748b;font-size:13px;letter-spacing:1.8px}
-.timer{font-size:40px;font-weight:800;color:#1e1b4b;margin:5px 0 22px}
-.btn{background:#0f172a;color:#fff;border:0;padding:13px 26px;border-radius:25px;font-size:15px;cursor:pointer}
-.sec{max-width:480px;margin:24px auto 0}.sec h2{font-size:22px}
-table{width:100%;background:#fff;color:#000;border-collapse:collapse;border-radius:10px;overflow:hidden;margin-top:12px}
-th,td{padding:13px 8px;text-align:center;font-size:16px;border-bottom:1px solid #eee}
-.num{border:1px solid #ddd;padding:4px 11px;border-radius:8px;display:inline-block;background:#fff}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:99;padding:15px}
-.modal.show{display:flex}
-.modalBox{background:#fff;color:#000;width:100%;max-width:420px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
-.modalBox input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;margin:8px 0;font-size:16px}
-.modalBox button{width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;cursor:pointer;margin-top:8px}
-.searchBtn{background:#7c3aed;color:#fff}.closeBtn{background:#e2e8f0}
-@media(max-width:420px){.ball{width:85px;height:85px;font-size:27px}.timer{font-size:34px}}
-</style>
-</head>
-<body>
-<h1>Punjab 15 Live Result</h1>
-<p class="sub">Result updates automatically at every interval</p>
-<div class="card">
-<div class="badge" id="resultBadge">Result for --:--</div>
-<div class="balls">
-<div><div class="ball" id="ballA">--</div><div class="label">A</div></div>
-<div><div class="ball" id="ballB">--</div><div class="label">B</div></div>
-<div><div class="ball" id="ballC">--</div><div class="label">C</div></div>
-</div>
-<div class="next">NEXT RESULT IN</div>
-<div class="timer" id="timerText">00:15:00</div>
-<button class="btn" onclick="openSearch()">🗓️ Search Previous Dates</button>
-</div>
-<div class="sec"><h2>🕐 Today's Results</h2>
-<table><thead><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="hist"></tbody></table></div>
-
-<div class="modal" id="modal"><div class="modalBox">
-<h3 style="text-align:center">🔍 Search Previous Results</h3>
-<label>Select Date</label>
-<input type="date" id="searchDate">
-<button class="searchBtn" onclick="doSearch()">Search Result</button>
-<div id="searchResult" style="margin-top:12px"></div>
-<button class="closeBtn" onclick="closeSearch()">Close</button>
-</div></div>
-
-<script>
-const firebaseConfig={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4",measurementId:"G-9B7HEFN16J"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();
-let allResults=[];
-function getDateKeyFromTime(t){let d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function todayKey(){return getDateKeyFromTime(Date.now());}
-function pad(n){return String(n).padStart(2,'0');}
-
-db.ref('draw').on('value',s=>{let v=s.val()||{};if(v.winning){document.getElementById('ballA').textContent=pad(v.winning[0]);document.getElementById('ballB').textContent=pad(v.winning[1]);document.getElementById('ballC').textContent=pad(v.winning[2]);document.getElementById('resultBadge').textContent='Result for '+(v.timeLabel||'');}});
-db.ref('results').on('value',s=>{allResults=[];s.forEach(c=>{let r=c.val();if(!r.dateKey && r.time) r.dateKey=getDateKeyFromTime(r.time);allResults.push(r);});renderToday();});
-
-function renderToday(){let rows='';let arr=allResults.filter(r=>r.dateKey===todayKey()).sort((a,b)=>b.time-a.time);arr.forEach(r=>{rows+=`<tr><td>${r.timeLabel}</td><td><span class="num">${pad(r.a)}</span></td><td><span class="num">${pad(r.b)}</span></td><td><span class="num">${pad(r.c)}</span></td></tr>`});document.getElementById('hist').innerHTML=rows||'<tr><td colspan="4">No results yet today</td></tr>';}
-
-// FIXED TIMER - Har 15 min ke slot pe countdown
-function updateTimer(){
-  let now=new Date();
-  let mins=now.getMinutes(), secs=now.getSeconds();
-  let minsToNext = 15 - (mins % 15);
-  if(minsToNext===15 && secs===0) minsToNext=15;
-  let totalSecs = (minsToNext*60) - secs;
-  if(totalSecs<=0) totalSecs=15*60;
-  let m=Math.floor(totalSecs/60), s=totalSecs%60;
-  document.getElementById('timerText').textContent='00:'+pad(m)+':'+pad(s);
-}
-updateTimer(); setInterval(updateTimer,1000);
-
-function openSearch(){document.getElementById('modal').classList.add('show');document.getElementById('searchDate').value=todayKey();doSearch();}
-function closeSearch(){document.getElementById('modal').classList.remove('show');}
-function doSearch(){let d=document.getElementById('searchDate').value;if(!d)return;let arr=allResults.filter(r=>r.dateKey===d).sort((a,b)=>b.time-a.time);let h='<table style="width:100%;border-collapse:collapse"><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr>';if(arr.length===0)h+='<tr><td colspan="4" style="text-align:center;padding:10px">No result found for this date</td></tr>';arr.forEach(r=>{h+=`<tr><td style="padding:8px;text-align:center;border-bottom:1px solid #eee">${r.timeLabel}</td><td style="text-align:center;border-bottom:1px solid #eee">${pad(r.a)}</td><td style="text-align:center;border-bottom:1px solid #eee">${pad(r.b)}</td><td style="text-align:center;border-bottom:1px solid #eee">${pad(r.c)}</td></tr>`});h+='</table>';document.getElementById('searchResult').innerHTML=h;}
-</script>
-</body>
-</html>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:linear-gradient(180deg,#8b5cf6,#5b21b6);min-height:100vh;padding:15px;color:#fff}
+h1{text-align:center;font-size:30px;margin-top:15px}.s{text-align:center;opacity:.85;font-size:14px;margin:5px 0 20px}
+.c{background:#fff;color:#222;border-radius:28px;padding:25px 15px;max-width:480px;margin:auto;text-align:center}
+.b{background:#7c3aed;color:#fff;padding:8px 22px;border-radius:20px;display:inline-block}
+.balls{display:flex;justify-content:space-around;margin:25px 0}
+.ball{width:95px;height:95px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a78bfa,#4c1d95);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.l{margin-top:10px;color:#64748b;font-weight:700}.n{margin-top:25px;color:#64748b;font-size:13px;letter-spacing:1.5px}
+.t{font-size:38px;font-weight:800;color:#1e1b4b;margin:5px 0 20

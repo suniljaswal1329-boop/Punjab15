@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Punjab 15 Live Result</title>
+<title>SuperLotto Live Result</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:linear-gradient(180deg,#8b5cf6,#5b21b6);min-height:100vh;padding:15px;color:#fff}
@@ -7,7 +7,10 @@ h1{text-align:center;font-size:30px;margin-top:15px}.s{text-align:center;opacity
 .c{background:#fff;color:#222;border-radius:28px;padding:25px 15px;max-width:480px;margin:auto;text-align:center}
 .b{background:#7c3aed;color:#fff;padding:8px 22px;border-radius:20px;display:inline-block}
 .balls{display:flex;justify-content:space-around;margin:25px 0}
-.ball{width:95px;height:95px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a78bfa,#4c1d95);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ball{width:95px;height:95px;border-radius:50%;color:#222;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.balls>div:nth-child(1).ball{background:radial-gradient(circle at 30% 30%,#e0f2fe,#7dd3fc)}
+.balls>div:nth-child(2).ball{background:radial-gradient(circle at 30% 30%,#fce7f3,#f9a8d4)}
+.balls>div:nth-child(3).ball{background:radial-gradient(circle at 30% 30%,#dcfce7,#86efac)}
 .l{margin-top:10px;color:#64748b;font-weight:700}.n{margin-top:25px;color:#64748b;font-size:13px;letter-spacing:1.5px}
 .t{font-size:38px;font-weight:800;color:#1e1b4b;margin:5px 0 20px}.btn{background:#0f172a;color:#fff;border:0;padding:13px 25px;border-radius:25px}
 .sec{max-width:480px;margin:20px auto 0}table{width:100%;background:#fff;color:#000;border-collapse:collapse;border-radius:10px;overflow:hidden;margin-top:10px}
@@ -16,14 +19,14 @@ th,td{padding:12px;text-align:center;border-bottom:1px solid #eee}
 .md.show{display:flex}.box{background:#fff;color:#000;width:100%;max-width:420px;border-radius:20px;padding:20px}
 .box input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;margin:8px 0}.box button{width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;margin-top:8px}
 </style></head><body>
-<h1>Punjab 15 Live Result</h1><p class="s">Result updates automatically at every interval</p>
+  <h1>SuperLotto Live Result</h1><p class="s" id="dstr">-</p><p class="s" style="margin-top:-15px">Result updates automatically at every interval</p>
 <div class="c"><div class="b" id="rt">Result for --:--</div><div class="balls">
 <div><div class="ball" id="a">--</div><div class="l">A</div></div>
 <div><div class="ball" id="b">--</div><div class="l">B</div></div>
 <div><div class="ball" id="c">--</div><div class="l">C</div></div></div>
 <div class="n">NEXT RESULT IN</div><div class="t" id="tm">00:15:00</div>
 <button class="btn" onclick="openS()">🗓️ Search Previous Dates</button></div>
-<div class="sec"><h2>🕐 Today's Results</h2><table><thead><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="hist"></tbody></table></div>
+<div class="sec"><h2>🕐 Today's Results</h2><table><thead><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="hist"></tbody></table></div>
 <div class="md" id="md"><div class="box"><h3 style="text-align:center">Search Previous Results</h3>
 <input type="date" id="d"><button style="background:#7c3aed;color:#fff" onclick="doS()">Search Result</button>
 <div id="sr" style="margin-top:10px"></div><button onclick="closeS()">Close</button></div></div>
@@ -32,9 +35,11 @@ const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlot
 firebase.initializeApp(cfg);let db=firebase.database(),all=[];
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 let p=n=>String(n).padStart(2,'0');
+let ds=d=>d.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+dstr.textContent=ds(new Date());
 db.ref('draw').on('value',s=>{let v=s.val();if(v&&v.winning){a.textContent=p(v.winning[0]);b.textContent=p(v.winning[1]);c.textContent=p(v.winning[2]);rt.textContent='Result for '+(v.timeLabel||'')}});
 db.ref('results').on('value',s=>{all=[];s.forEach(x=>{let r=x.val();if(!r.dateKey)r.dateKey=dk(r.time);all.push(r)});show()});
-function show(){let h='';all.filter(r=>r.dateKey==dk(Date.now())).reverse().forEach(r=>{h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`});hist.innerHTML=h||'<tr><td colspan="4">No results yet</td></tr>'}
+function show(){let h='';all.filter(r=>r.dateKey==dk(Date.now())).reverse().forEach(r=>{h+=`<tr><td>${r.dateKey}</td><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`});hist.innerHTML=h||'<tr><td colspan="5">No results yet</td></tr>'}
 function tick(){let n=new Date(),rem=(15-(n.getMinutes()%15))*60-n.getSeconds();tm.textContent='00:'+p(Math.floor(rem/60))+':'+p(rem%60)}setInterval(tick,1000);tick();
 function openS(){md.classList.add('show');d.value=dk(Date.now());doS()}
 function closeS(){md.classList.remove('show')}

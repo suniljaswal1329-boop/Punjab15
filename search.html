@@ -13,8 +13,9 @@
 <script>
 const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
 firebase.initializeApp(cfg);let db=firebase.database(); let p=n=>String(n).padStart(2,'0');
+let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
 function toMin(t){ if(!t) return 0; let parts=t.split(' '); let tm=parts[0].split(':'); let h=parseInt(tm[0]), m=parseInt(tm[1]), ap=parts[1]; if(ap=='PM' && h!=12) h+=12; if(ap=='AM' && h==12) h=0; return h*60+m; }
-function doSearch(){ let date=document.getElementById('dateInput').value; if(!date) return alert('Date select karo'); db.ref('results').once('value',s=>{ let arr=[]; s.forEach(x=>{let r=x.val(); if(r.dateKey==date) arr.push(r);}); arr.sort((x,y)=>toMin(y.timeLabel)-toMin(x.timeLabel)); let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.dateKey}</td><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`;}); list.innerHTML=h||'<tr><td colspan="5">No Result Found</td></tr>'; });}
+function doSearch(){ let date=document.getElementById('dateInput').value; if(!date) return alert('Date select karo'); db.ref('results').once('value',s=>{ let arr=[]; s.forEach(x=>{let r=x.val(); let rdate = r.dateKey || dk(r.time); if(rdate==date) arr.push(r);}); arr.sort((x,y)=>toMin(y.timeLabel)-toMin(x.timeLabel)); let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.dateKey||dk(r.time)}</td><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`;}); list.innerHTML=h||'<tr><td colspan="5">No Result Found</td></tr>'; });}
 let now=new Date(); let today=now.getFullYear()+'-'+p(now.getMonth()+1)+'-'+p(now.getDate()); document.getElementById('dateInput').value=today; doSearch();
 </script>
 </body>

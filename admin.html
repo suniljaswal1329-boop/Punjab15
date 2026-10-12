@@ -23,7 +23,6 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <body>
 <h1>SuperLotto Admin</h1>
 
-<!-- 1. Normal Publish -->
 <div class="card">
 <h2>New Result Publish</h2>
 <div class="auto" id="autoTime">Auto Time: --</div>
@@ -32,7 +31,6 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <button class="btn" onclick="cancelEdit()">Cancel Edit</button>
 </div>
 
-<!-- 2. NEW: Missed Result -->
 <div class="card" style="border:2px dashed #a855f7">
 <h2>⏰ Missed Result Add Karo</h2>
 <p style="color:#555;font-size:14px">Jo time chhoot gaya ho wo yahan se daalo</p>
@@ -42,7 +40,6 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 <br><button class="btn btn-green" onclick="publishMissed()">Add Missed Result</button>
 </div>
 
-<!-- 3. Today's List -->
 <div class="card">
 <h2>Today's Results - Edit</h2>
 <table><tr><th>Time</th><th>A</th><th>B</th><th>C</th><th>Action</th></tr><tbody id="list"></tbody></table>
@@ -54,8 +51,9 @@ firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
 let format12=(h,m)=>{let ap=h>=12?'PM':'AM';let hh=h%12;if(hh==0)hh=12;return hh+':'+p(m)+' '+ap;};
+let editKey=null;
 
-// Auto Time - har 15 min
+// Auto Time
 function calcAuto(){
   let now=new Date(); let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15; let t=new Date(now);
   if(next>=60){t.setHours(t.getHours()+1);next=0} t.setMinutes(next,0,0);
@@ -64,7 +62,7 @@ function calcAuto(){
 autoTime.textContent='Auto Time: '+calcAuto();
 setInterval(()=>autoTime.textContent='Auto Time: '+calcAuto(),1000);
 
-// Missed Time Dropdown - 8:45 AM se 10:00 PM tak saare slots
+// Missed Time Dropdown - 8:45 AM to 10:00 PM
 let sel=document.getElementById('missTime');
 for(let h=8;h<=22;h++){
   for(let m=0;m<60;m+=15){
@@ -77,30 +75,55 @@ for(let h=8;h<=22;h++){
 function publish(){
   let a=+document.getElementById('a').value, b=+document.getElementById('b').value, c=+document.getElementById('c').value;
   if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('A B C daalo');
-  let timeLabel=calcAuto(); let now=Date.now();
-  db.ref('draw').set({a,b,c,timeLabel,time:now});
-  db.ref('results').push({a,b,c,timeLabel,time:now,dateKey:dk(now)});
-  alert('Published '+timeLabel);
+  if(editKey){
+    db.ref('results/'+editKey).update({a,b,c});
+    db.ref('draw').set({a,b,c,timeLabel:document.getElementById('autoTime').textContent,time:Date.now()});
+    alert('Edited');
+    editKey=null;
+  } else {
+    let timeLabel=calcAuto(); let now=Date.now();
+    db.ref('draw').set({a,b,c,timeLabel,time:now});
+    db.ref('results').push({a,b,c,timeLabel,time:now,dateKey:dk(now)});
+    alert('Published '+timeLabel);
+  }
+  document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value='';
 }
+
 function publishMissed(){
   let a=+document.getElementById('ma').value, b=+document.getElementById('mb').value, c=+document.getElementById('mc').value;
   let timeLabel=sel.value;
   if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('A B C daalo');
   let now=Date.now();
-  // Time label se time banake save karenge, taaki list me sahi order me aaye
   db.ref('results').push({a,b,c,timeLabel,time:now,dateKey:dk(now)});
   alert('Missed Result Added: '+timeLabel);
   document.getElementById('ma').value='';document.getElementById('mb').value='';document.getElementById('mc').value='';
 }
-function cancelEdit(){ document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value=''; }
+
+function cancelEdit(){ editKey=null; document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value=''; }
+
+// TimeLabel ko minute me convert karne ke liye - SORT FIX
+function toMin(t){
+  if(!t) return 0;
+  let parts=t.split(' ');
+  let tm=parts[0].split(':');
+  let h=parseInt(tm[0]), m=parseInt(tm[1]), ap=parts[1];
+  if(ap=='PM' && h!=12) h+=12;
+  if(ap=='AM' && h==12) h=0;
+  return h*60+m;
+}
 
 db.ref('results').on('value',s=>{
-  let arr=[]; s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==dk(Date.now())) arr.push(r);});
-  // Time ke hisab se sort karo taaki 5:15, 5:30 sahi order me dikhe
-  arr.sort((x,y)=>y.time-x.time);
-  let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick="alert('Edit ke liye purana system use karo')">Edit</button></td></tr>`;});
+  let arr=[]; s.forEach(x=>{let r=x.val(); r._key=x.key; if((r.dateKey||dk(r.time))==dk(Date.now())) arr.push(r);});
+  arr.sort((x,y)=>toMin(y.timeLabel)-toMin(x.timeLabel));
+  let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick="startEdit('${r._key}',${r.a},${r.b},${r.c})">Edit</button></td></tr>`;});
   list.innerHTML=h;
 });
+
+function startEdit(key,a,b,c){
+  editKey=key;
+  document.getElementById('a').value=a; document.getElementById('b').value=b; document.getElementById('c').value=c;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 </script>
 </body>
 </html>

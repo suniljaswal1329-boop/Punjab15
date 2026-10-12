@@ -1,46 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin - SUPER LOTTO</title>
-<link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUPER LOTTO - ADMIN</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{background:#111;font-family:Arial;padding:10px;color:#fff}
-.header{text-align:center;padding:14px;border-radius:14px;border:2px solid #facc15;background:#000;margin-bottom:10px}
-.header h1{font-family:'Righteous',cursive;font-size:34px;color:#facc15}
-.timer{text-align:center;background:#fff;color:#111;padding:14px;border-radius:14px;margin-bottom:10px;border:2px solid #facc15}
-.timer b{font-size:38px;display:block;color:#111}
-.card{background:#fff;color:#111;border-radius:14px;padding:12px;margin-bottom:10px}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;text-align:center;font-weight:900;margin-bottom:8px}
-.btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:900;font-size:15px;cursor:pointer}
-.save{background:#111;color:#facc15}.del{background:#ef4444;color:#fff;margin-top:8px}
-.grid{display:flex;gap:8px}.grid input{flex:1}
-.list{background:#fff;color:#111;border-radius:14px;padding:10px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#111;padding:14px}
+.header{background:#000;border:2px solid #facc15;border-radius:16px;text-align:center;padding:18px 10px}
+.header h1{color:#facc15;font-size:34px;font-weight:900;letter-spacing:1px}
+.header p{color:#888;font-size:12px;letter-spacing:2px;margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:18px;margin-top:14px;border:2px solid #facc15}
+.card h2{text-align:center;font-size:14px;color:#666;letter-spacing:1px}
+#timer{text-align:center;font-size:44px;font-weight:800;margin:4px 0}
+#slot{text-align:center;font-size:38px;font-weight:800;color:#b58900}
+#dateTxt{text-align:center;font-size:16px;margin-top:4px}
+input{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin-top:10px;text-align:center}
+.row{display:flex;gap:10px}
+.row input{font-size:22px;font-weight:800}
+.btn{background:#000;color:#facc15;border:0;width:100%;padding:16px;border-radius:12px;font-size:18px;font-weight:800;margin-top:12px;cursor:pointer}
+.del{background:#ef4444;color:#fff}
+.note{text-align:center;color:#666;font-size:12px;margin-top:10px}
+.hist{background:#fff;border-radius:16px;padding:16px;margin-top:14px}
+.hist h3{font-size:18px;margin-bottom:10px}
+.hist div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:15px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SUPER LOTTO</h1><div style="font-size:11px;color:#aaa">ADMIN - ALL IN ONE</div></div>
-
-<div class="timer">
-<div style="font-size:12px;color:#666">NEXT DRAW IN</div>
-<b id="timer">00:00:00</b>
-<div style="margin-top:6px;font-size:14px">Save Slot: <b id="slot" style="color:#b78c00">--:--</b> | <span id="date"></span></div>
-</div>
-
+<div class="header"><h1>SUPER LOTTO</h1><p>ADMIN - ALL IN ONE</p></div>
 <div class="card">
-<input type="password" id="pass" placeholder="Password = 1234">
-<div class="grid"><input id="a" placeholder="A"><input id="b" placeholder="B"><input id="c" placeholder="C"></div>
-<button class="btn save" onclick="saveLive()">SAVE RESULT</button>
+<h2>NEXT DRAW IN</h2><div id="timer">00:00:00</div>
+<div>Save Slot:</div><div id="slot">--:--</div><div id="dateTxt">--/--/----</div>
+<input type="password" id="pass" placeholder="Password (1234)">
+<div class="row"><input id="a" maxlength="2" placeholder="A"><input id="b" maxlength="2" placeholder="B"><input id="c" maxlength="2" placeholder="C"></div>
+<button class="btn" onclick="saveLive()">SAVE RESULT</button>
 <button class="btn del" onclick="deleteAll()">DELETE ALL HISTORY</button>
-<p style="font-size:10px;color:#666;text-align:center;margin-top:6px">9:17 pe save karoge to 9:15 hi save hoga + purana auto hatega</p>
+<p class="note">9:17 pe save karoge to 9:15 hi save hoga + purana auto hatega</p>
 </div>
-
-<div class="list" id="history">Loading history...</div>
+<div class="hist"><h3>History</h3><div id="histList">Loading...</div></div>
 
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getDatabase,ref,set,remove,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const cfg={apiKey:"AIzaSyBmWl4dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",authDomain:"punjab15-1329.firebaseapp.com",databaseURL:"https://punjab15-1329-default-rtdb.firebaseio.com",projectId:"punjab15-1329",storageBucket:"punjab15-1329.firebasestorage.app",messagingSenderId:"586224821147",appId:"1:586224821147:web:d8f55f83372f5d6dd1773e"};
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,set,remove,onValue} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// 👇 YAHAN PURANI ADMIN WALI CFG PASTE KARO - SIRF YAHI EK JAGAH
+const cfg={
+ apiKey:"AIzaSyBmW14dDF4pXbdBZ-YVYLrYWrFgDYDbGCE",
+ authDomain:"YOUR_PROJECT.firebaseapp.com",
+ databaseURL:"https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+ projectId:"YOUR_PROJECT",
+ storageBucket:"YOUR_PROJECT.appspot.com",
+ messagingSenderId:"YOUR_ID",
+ appId:"YOUR_APP_ID"
+};
 const app=initializeApp(cfg),db=getDatabase(app);
 
 function getFixedSlot(){
@@ -48,17 +59,17 @@ function getFixedSlot(){
  let fixed=Math.floor(now.getMinutes()/15)*15;
  let d=new Date(now); d.setMinutes(fixed); d.setSeconds(0); d.setMilliseconds(0);
  let h=d.getHours(); let ap=h>=12?'PM':'AM'; let hr=h%12||12;
- let timeStr=String(hr).padStart(2,'0')+":"+String(fixed).padStart(2,'0')+" "+ap.toLowerCase();
+ let timeStr=String(hr).padStart(2,'0')+":"+String(fixed).padStart(2,'0')+" "+ap;
  let dateStr=String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
- return {dateStr,timeStr,fullDate:d,now,hour:h};
+ return {timeStr,dateStr,fullDate:d,now,hour:h};
 }
 function tick(){
  let s=getFixedSlot();
  document.getElementById('slot').innerText=s.timeStr;
- document.getElementById('date').innerText=s.dateStr;
+ document.getElementById('dateTxt').innerText="| "+s.dateStr;
  let next=new Date(s.fullDate); next.setMinutes(next.getMinutes()+15);
- let diff=Math.floor((next - s.now)/1000); if(diff<0) diff=0;
- let m=Math.floor(diff/60), sec=diff%60;
+ let diff=Math.floor((next-s.now)/1000); if(diff<0)diff=0;
+ let m=Math.floor(diff/60),sec=diff%60;
  document.getElementById('timer').innerText="00:"+String(m).padStart(2,'0')+":"+String(sec).padStart(2,'0');
 }
 setInterval(tick,1000); tick();
@@ -69,21 +80,24 @@ window.saveLive=async()=>{
  if(!a||!b||!c) return alert("A B C bharo");
  let s=getFixedSlot();
  if(s.hour<9||s.hour>=21) return alert("9AM-9PM only!");
- let key=s.dateStr.replaceAll("/","-")+"_"+s.timeStr.replaceAll(" ","").replaceAll(":","-");
- await remove(ref(db,'live/result'));
- await set(ref(db,'live/result'),{a,b,c,date:s.dateStr,time:s.timeStr,timestamp:Date.now()});
- await set(ref(db,'history/'+key),{a,b,c,date:s.dateStr,time:s.timeStr,timestamp:Date.now()});
- alert("Saved: "+s.timeStr);
+ let key=s.dateStr.replaceAll("/","-")+"_"+s.timeStr.replaceAll(" ","");
+ await set(ref(db,'live/result'),{a,b,c,date:s.dateStr,time:s.timeStr});
+ await set(ref(db,'history/'+key),{a,b,c,date:s.dateStr,time:s.timeStr});
+ alert("Saved: "+s.timeStr+" - "+a+"-"+b+"-"+c);
  document.getElementById('a').value="";document.getElementById('b').value="";document.getElementById('c').value="";
-};
+}
 window.deleteAll=async()=>{
- if(document.getElementById('pass').value!=="1234") return alert("Password daalo!");
- if(confirm("Delete all history?")){await remove(ref(db,'history')); alert("Deleted");}
-};
-onValue(ref(db,'history'),snap=>{
- let h=document.getElementById('history'); h.innerHTML="<b>History</b><br><br>";
- let arr=[]; snap.forEach(c=>arr.push(c.val())); arr.sort((x,y)=>y.timestamp-x.timestamp);
- arr.forEach(r=>{h.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><div>${r.date} ${r.time}</div><div>${r.a} - ${r.b} - ${r.c}</div></div>`;});
+ if(document.getElementById('pass').value!=="1234") return alert("Password dalo");
+ if(!confirm("Saara history delete karna hai?")) return;
+ await remove(ref(db,'history')); await remove(ref(db,'live/result'));
+ alert("Deleted!");
+}
+onValue(ref(db,'history'),(snap)=>{
+ let html="";
+ let arr=[]; snap.forEach(ch=>{let v=ch.val();v.key=ch.key;arr.push(v)});
+ arr.sort((a,b)=>b.key.localeCompare(a.key));
+ arr.slice(0,20).forEach(r=>{ html+=`<div><span>${r.date} ${r.time}</span><b>${r.a} - ${r.b} - ${r.c}</b></div>` });
+ document.getElementById('histList').innerHTML=html||"No history";
 });
 </script>
 </body>

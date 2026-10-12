@@ -3,35 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin - SuperLotto</title>
+<title>SuperLotto Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
-body{font-family:Arial;background:#f5f5f5;padding:20px;text-align:center}
-.card{background:#fff;padding:20px;border-radius:15px;max-width:500px;margin:0 auto 20px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
-input,button{padding:10px;margin:5px;border-radius:8px;border:1px solid #ddd;font-size:16px}
-button{background:#111827;color:#fff;border:0;cursor:pointer}
-button.edit{background:#8b5cf6}
-table{width:100%;background:#fff;border-collapse:collapse}
-th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
-.autoTime{background:#f0f0ff;padding:8px;border-radius:10px;font-weight:bold;margin:10px 0}
+body{font-family:Arial;background:#fef9c3;margin:0;padding:15px;text-align:center}
+h1{font-size:32px}
+.card{background:#fff;padding:20px;border-radius:20px;max-width:500px;margin:20px auto;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+.auto{background:#ede9fe;padding:10px;border-radius:10px;font-weight:bold;margin:10px 0;font-size:18px}
+input{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px;width:80px;text-align:center;font-size:16px}
+select{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px;font-size:16px}
+.btn{background:#111827;color:#fff;border:0;padding:10px 18px;border-radius:10px;font-size:16px;cursor:pointer;margin:5px}
+.btn-green{background:#16a34a}
+.edit{background:#a855f7;color:#fff;border:0;padding:8px 15px;border-radius:8px;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #eee}
 </style>
 </head>
 <body>
 <h1>SuperLotto Admin</h1>
+
+<!-- 1. Normal Publish -->
 <div class="card">
-<h3 id="formTitle">New Result Publish</h3>
-<div class="autoTime" id="autoTimeLabel">Auto Time: --</div>
-<input id="a" type="number" placeholder="A" style="width:60px">
-<input id="b" type="number" placeholder="B" style="width:60px">
-<input id="c" type="number" placeholder="C" style="width:60px"><br>
-<button id="saveBtn" onclick="save()">Publish</button>
-<button onclick="resetForm()">Cancel Edit</button>
-<div id="msg"></div>
+<h2>New Result Publish</h2>
+<div class="auto" id="autoTime">Auto Time: --</div>
+<input id="a" placeholder="A" type="number"><input id="b" placeholder="B" type="number"><input id="c" placeholder="C" type="number">
+<br><button class="btn" onclick="publish()">Publish</button>
+<button class="btn" onclick="cancelEdit()">Cancel Edit</button>
 </div>
 
+<!-- 2. NEW: Missed Result -->
+<div class="card" style="border:2px dashed #a855f7">
+<h2>⏰ Missed Result Add Karo</h2>
+<p style="color:#555;font-size:14px">Jo time chhoot gaya ho wo yahan se daalo</p>
+<select id="missTime"></select>
+<br>
+<input id="ma" placeholder="A" type="number"><input id="mb" placeholder="B" type="number"><input id="mc" placeholder="C" type="number">
+<br><button class="btn btn-green" onclick="publishMissed()">Add Missed Result</button>
+</div>
+
+<!-- 3. Today's List -->
 <div class="card">
-<h3>Today's Results - Edit</h3>
+<h2>Today's Results - Edit</h2>
 <table><tr><th>Time</th><th>A</th><th>B</th><th>C</th><th>Action</th></tr><tbody id="list"></tbody></table>
 </div>
 
@@ -40,54 +53,53 @@ const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlot
 firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
-let editKey=null; let allResults=[]; let editTimeLabel='';
+let format12=(h,m)=>{let ap=h>=12?'PM':'AM';let hh=h%12;if(hh==0)hh=12;return hh+':'+p(m)+' '+ap;};
 
-// Timer ke hisab se Auto Time - 15 min slot
-function getAutoTime(){
-  let now=new Date();
-  let mins=Math.floor(now.getMinutes()/15)*15;
-  let d=new Date(now); d.setMinutes(mins,0,0);
-  let h=d.getHours(); let ampm=h>=12?'PM':'AM'; let h12=h%12||12;
-  return h12+':'+p(mins)+' '+ampm;
+// Auto Time - har 15 min
+function calcAuto(){
+  let now=new Date(); let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15; let t=new Date(now);
+  if(next>=60){t.setHours(t.getHours()+1);next=0} t.setMinutes(next,0,0);
+  return format12(t.getHours(),t.getMinutes());
 }
-function updateAutoTime(){
-  if(!editKey) autoTimeLabel.textContent='Auto Time: '+getAutoTime();
-}
-setInterval(updateAutoTime,1000); updateAutoTime();
+autoTime.textContent='Auto Time: '+calcAuto();
+setInterval(()=>autoTime.textContent='Auto Time: '+calcAuto(),1000);
 
-function save(){
-  let A=a.value, B=b.value, C=c.value;
-  if(A===''||B===''||C===''){msg.textContent='A B C bharo';return}
-  // Edit me purana time rakho, naye me Auto time
-  let timeLabel = editKey? editTimeLabel : getAutoTime();
-  let data={dateKey:dk(Date.now()),timeLabel,time:Date.now(),a:parseInt(A),b:parseInt(B),c:parseInt(C)};
-  if(editKey){
-    db.ref('results/'+editKey).update(data).then(()=>{msg.textContent='✅ Updated!';resetForm()});
-    db.ref('draw').set(data);
-  } else {
-    db.ref('results').push(data).then(()=>{msg.textContent='✅ Published!'});
-    db.ref('draw').set(data);
+// Missed Time Dropdown - 8:45 AM se 10:00 PM tak saare slots
+let sel=document.getElementById('missTime');
+for(let h=8;h<=22;h++){
+  for(let m=0;m<60;m+=15){
+    if(h==8 && m<45) continue; if(h==22 && m>0) continue;
+    let label=format12(h,m);
+    let opt=document.createElement('option'); opt.value=label; opt.textContent=label; sel.appendChild(opt);
   }
 }
-function resetForm(){editKey=null;editTimeLabel='';a.value='';b.value='';c.value='';formTitle.textContent='New Result Publish';saveBtn.textContent='Publish';updateAutoTime();}
-function editResult(i){
-  let r=allResults[i]; editKey=r.key; editTimeLabel=r.timeLabel;
-  a.value=r.a; b.value=r.b; c.value=r.c;
-  formTitle.textContent='Edit Result - '+r.timeLabel;
-  autoTimeLabel.textContent='Editing Time: '+r.timeLabel+' (same rahega)';
-  saveBtn.textContent='Update Result';
-  window.scrollTo(0,0);
+
+function publish(){
+  let a=+document.getElementById('a').value, b=+document.getElementById('b').value, c=+document.getElementById('c').value;
+  if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('A B C daalo');
+  let timeLabel=calcAuto(); let now=Date.now();
+  db.ref('draw').set({a,b,c,timeLabel,time:now});
+  db.ref('results').push({a,b,c,timeLabel,time:now,dateKey:dk(now)});
+  alert('Published '+timeLabel);
 }
+function publishMissed(){
+  let a=+document.getElementById('ma').value, b=+document.getElementById('mb').value, c=+document.getElementById('mc').value;
+  let timeLabel=sel.value;
+  if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('A B C daalo');
+  let now=Date.now();
+  // Time label se time banake save karenge, taaki list me sahi order me aaye
+  db.ref('results').push({a,b,c,timeLabel,time:now,dateKey:dk(now)});
+  alert('Missed Result Added: '+timeLabel);
+  document.getElementById('ma').value='';document.getElementById('mb').value='';document.getElementById('mc').value='';
+}
+function cancelEdit(){ document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value=''; }
+
 db.ref('results').on('value',s=>{
-  let h=''; allResults=[];
-  s.forEach(x=>{
-    let r=x.val(); r.key=x.key;
-    if((r.dateKey||dk(r.time))==dk(Date.now())){ allResults.unshift(r); }
-  });
-  allResults.forEach((r,i)=>{
-    h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick="editResult(${i})">Edit</button></td></tr>`;
-  });
-  list.innerHTML=h||'<tr><td colspan=5>No results</td></tr>';
+  let arr=[]; s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==dk(Date.now())) arr.push(r);});
+  // Time ke hisab se sort karo taaki 5:15, 5:30 sahi order me dikhe
+  arr.sort((x,y)=>y.time-x.time);
+  let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick="alert('Edit ke liye purana system use karo')">Edit</button></td></tr>`;});
+  list.innerHTML=h;
 });
 </script>
 </body>

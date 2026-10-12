@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SuperLotto Admin</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
-body{font-family:Arial;background:#f2f2f2;padding:15px}
-.card{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 8px #0002}
-input,select{padding:10px;margin:5px 0;width:120px}
-.btn{background:#007bff;color:#fff;border:0;padding:10px 18px;border-radius:6px;cursor:pointer}
+body{font-family:Arial;background:#f2f2f2;padding:15px;margin:0}
+.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:15px}
+input,select{padding:10px;margin:5px 0;width:90px}
+.btn{background:#007bff;color:#fff;border:0;padding:10px 15px;border-radius:8px;cursor:pointer}
 .btn-green{background:green}
-.auto{font-size:18px;font-weight:bold;margin:10px 0;color:#007bff}
-table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:center}
+.auto{font-size:18px;font-weight:bold;margin:10px 0}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
 </style></head><body>
 <h1>SuperLotto Admin</h1>
 
 <div class="card">
 <h2>New Result Publish</h2>
-<div class="auto" id="autoTime">Auto Time: </div>
-<input id="a" placeholder="A" type="number"><input id="b" placeholder="B" type="number"><input id="c" placeholder="C" type="number">
+<div class="auto" id="autoTime">Auto Time: --</div>
+<input id="a" placeholder="A" type="number">
+<input id="b" placeholder="B" type="number">
+<input id="c" placeholder="C" type="number">
 <br><button class="btn" onclick="publish()">Publish</button>
 <button class="btn" onclick="cancelEdit()">Cancel Edit</button>
 </div>
 
-<div class="card" style="border:2px dashed #f90">
+<div class="card" style="border:2px dashed #888">
 <h2>⏰ Missed Result Add Karo</h2>
-<p style="color:#555;font-size:14px">Jo time miss ho gaya usko yahan se add karo</p>
+<p style="color:#555;font-size:14px">Jo time chhoot gaya ho wo yahan se daalo</p>
 <select id="missTime"></select>
 <br>
-<input id="ma" placeholder="A" type="number"><input id="mb" placeholder="B" type="number"><input id="mc" placeholder="C" type="number">
-<br><button class="btn btn-green" onclick="publishMissed()">Add Missed Result</button>
+<input id="ma" placeholder="A" type="number">
+<input id="mb" placeholder="B" type="number">
+<input id="mc" placeholder="C" type="number">
+<br><button class="btn btn-green" onclick="addMissed()">Add Missed Result</button>
 </div>
 
 <div class="card">
@@ -37,22 +42,22 @@ table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8p
 </div>
 
 <script>
-// === APNA PURANA CONFIG YAHAN DAALO - line 49 wala ===
-const cfg={apiKey:"APNA_PURANA_APIKEY_YAHAN",authDomain:"YOUR_PROJECT.firebaseapp.com",databaseURL:"https://YOUR_PROJECT-default-rtdb.firebaseio.com",projectId:"YOUR_PROJECT",storageBucket:"YOUR_PROJECT.appspot.com",messagingSenderId:"YOUR_SENDER_ID",appId:"YOUR_APP_ID"};
+// === APNA PURANA CONFIG YAHAN DAALO - line 41 wala ===
+const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
 firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
-let format12=(h,m)=>{let ap=h>=12?'PM':'AM';let hh=h%12;if(hh==0)hh=12;return hh+':'+p(m)+' '+ap};
+let format12=(h,m)=>{let ap=h>=12?'PM':'AM';let hh=h%12||12;return hh+':'+p(m)+' '+ap};
 let editKey=null;
 
-// ===== SIRF YE FUNCTION CHANGE HUA HAI =====
+// ==== SIRF YE FUNCTION CHANGE HUA HAI = floor wala ====
 function calcAuto(){
   let t=new Date();
   t.setMinutes(Math.floor(t.getMinutes()/15)*15,0,0);
   return format12(t.getHours(),t.getMinutes());
 }
 autoTime.textContent='Auto Time: '+calcAuto();
-setInterval(()=>autoTime.textContent='Auto Time: '+calcAuto(),10000);
+setInterval(()=>autoTime.textContent='Auto Time: '+calcAuto(),1000);
 
 // Missed Time Dropdown - 8:45 AM to 10:00 PM
 let sel=document.getElementById('missTime');
@@ -63,56 +68,44 @@ for(let h=8;h<=22;h++){
     let opt=document.createElement('option');opt.value=label;opt.textContent=label;sel.appendChild(opt);
   }
 }
+sel.value=calcAuto();
 
 function publish(){
-  let a=+document.getElementById('a').value,b=+document.getElementById('b').value,c=+document.getElementById('c').value;
-  if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('Fill A,B,C');
+  let A=+a.value,B=+b.value,C=+c.value;
+  if(isNaN(A)||isNaN(B)||isNaN(C)) return alert('3 number daalo');
+  let t=new Date(); t.setMinutes(Math.floor(t.getMinutes()/15)*15,0,0);
+  let lb=format12(t.getHours(),t.getMinutes());
   if(editKey){
-    db.ref('results/'+editKey).update({a,b,c});
-    db.ref('draw').set({a,b,c,timeLabel:document.getElementById('a').value,ts:Date.now()});
-    alert('Edited');editKey=null;
+    db.ref('results/'+editKey).update({a:A,b:B,c:C});
+    db.ref('draw').set({a:A,b:B,c:C,time:t.getTime(),timeLabel:lb,dateKey:dk(t.getTime())});
+    editKey=null; alert('Edited: '+lb);
   } else {
-    let timeLabel=calcAuto(); let now=Date.now();
-    db.ref('draw').set({a,b,c,timeLabel,ts:now});
-    db.ref('results').push({a,b,c,timeLabel,ts:now});
-    alert('Published '+timeLabel);
+    db.ref('draw').set({a:A,b:B,c:C,time:t.getTime(),timeLabel:lb,dateKey:dk(t.getTime())});
+    db.ref('results').push({a:A,b:B,c:C,time:t.getTime(),timeLabel:lb,dateKey:dk(t.getTime())});
   }
-  document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value='';
+  a.value=b.value=c.value='';
 }
-
-function publishMissed(){
-  let a=+document.getElementById('ma').value,b=+document.getElementById('mb').value,c=+document.getElementById('mc').value;
-  let timeLabel=sel.value;
-  if(isNaN(a)||isNaN(b)||isNaN(c)) return alert('Fill A,B,C');
-  let now=Date.now();
-  db.ref('results').push({a,b,c,timeLabel,ts:now});
-  alert('Missed Result Added: '+timeLabel);
-  document.getElementById('ma').value='';document.getElementById('mb').value='';document.getElementById('mc').value='';
+function cancelEdit(){editKey=null;a.value=b.value=c.value='';}
+function addMissed(){
+  let A=+ma.value,B=+mb.value,C=+mc.value;
+  if(isNaN(A)||isNaN(B)||isNaN(C)) return alert('3 number daalo');
+  let lb=missTime.value;
+  let now=new Date();
+  let h=parseInt(lb.split(':')[0]);let m=parseInt(lb.split(':')[1].split(' ')[0]);let isPM=lb.includes('PM');
+  if(isPM&&h!=12)h+=12; if(!isPM&&h==12)h=0;
+  let t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m);
+  db.ref('results').push({a:A,b:B,c:C,time:t.getTime(),timeLabel:lb,dateKey:dk(t.getTime())});
+  alert('Missed Added: '+lb);
+  ma.value=mb.value=mc.value='';
 }
+function editRes(k,r){editKey=k;a.value=r.a;b.value=r.b;c.value=r.c;window.scrollTo(0,0);alert('Edit Mode: '+r.timeLabel);}
+function delRes(k){if(confirm('Delete?')) db.ref('results/'+k).remove();}
 
-function cancelEdit(){ editKey=null; document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('c').value=''; }
-
-// TimeLabel ko minute me convert karne ke liye
-function toMin(t){
-  if(!t) return 0;
-  let parts=t.split(' ');let tm=parts[0].split(':');let ap=parts[1];
-  let h=parseInt(tm[0]), m=parseInt(tm[1]);
-  if(ap=='PM' && h!=12) h+=12;
-  if(ap=='AM' && h==12) h=0;
-  return h*60+m;
-}
-
-db.ref('results').on('value',s=>{
-  let arr=[]; s.forEach(x=>{let r=x.val();r.key=x.key;arr.push(r)});
-  arr.sort((x,y)=>toMin(y.timeLabel)-toMin(x.timeLabel));
-  let h=''; arr.forEach(r=>{ h+=`<tr><td>${r.timeLabel}</td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td><td><button onclick="startEdit('${r.key}',${r.a},${r.b},${r.c})">Edit</button></td></tr>`});
+// Today's list
+let today=dk(Date.now());
+db.ref('results').orderByChild('dateKey').equalTo(today).on('value',s=>{
+  let h='';s.forEach(x=>{let r=x.val();h=`<tr><td>${r.timeLabel}</td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td><td><button onclick="editRes('${x.key}',${JSON.stringify(r).replace(/"/g,'&quot;')})">Edit</button> <button onclick="delRes('${x.key}')">Del</button></td></tr>`+h});
   list.innerHTML=h;
 });
-
-function startEdit(key,a,b,c){
-  editKey=key;
-  document.getElementById('a').value=a;document.getElementById('b').value=b;document.getElementById('c').value=c;
-  window.scrollTo(0,0);alert('Editing '+a+' '+b+' '+c);
-}
 </script>
 </body></html>

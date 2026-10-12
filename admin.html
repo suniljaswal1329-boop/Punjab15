@@ -14,13 +14,14 @@ button{background:#111827;color:#fff;border:0;cursor:pointer}
 button.edit{background:#8b5cf6}
 table{width:100%;background:#fff;border-collapse:collapse}
 th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
+.autoTime{background:#f0f0ff;padding:8px;border-radius:10px;font-weight:bold;margin:10px 0}
 </style>
 </head>
 <body>
 <h1>SuperLotto Admin</h1>
 <div class="card">
 <h3 id="formTitle">New Result Publish</h3>
-<input id="t" placeholder="Time e.g. 2:15 PM">
+<div class="autoTime" id="autoTimeLabel">Auto Time: --</div>
 <input id="a" type="number" placeholder="A" style="width:60px">
 <input id="b" type="number" placeholder="B" style="width:60px">
 <input id="c" type="number" placeholder="C" style="width:60px"><br>
@@ -39,11 +40,26 @@ const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlot
 firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
-let editKey=null;
+let editKey=null; let allResults=[]; let editTimeLabel='';
+
+// Timer ke hisab se Auto Time - 15 min slot
+function getAutoTime(){
+  let now=new Date();
+  let mins=Math.floor(now.getMinutes()/15)*15;
+  let d=new Date(now); d.setMinutes(mins,0,0);
+  let h=d.getHours(); let ampm=h>=12?'PM':'AM'; let h12=h%12||12;
+  return h12+':'+p(mins)+' '+ampm;
+}
+function updateAutoTime(){
+  if(!editKey) autoTimeLabel.textContent='Auto Time: '+getAutoTime();
+}
+setInterval(updateAutoTime,1000); updateAutoTime();
 
 function save(){
-  let timeLabel=t.value, A=a.value, B=b.value, C=c.value;
-  if(!timeLabel||A===''||B===''||C===''){msg.textContent='Sab bharo';return}
+  let A=a.value, B=b.value, C=c.value;
+  if(A===''||B===''||C===''){msg.textContent='A B C bharo';return}
+  // Edit me purana time rakho, naye me Auto time
+  let timeLabel = editKey? editTimeLabel : getAutoTime();
   let data={dateKey:dk(Date.now()),timeLabel,time:Date.now(),a:parseInt(A),b:parseInt(B),c:parseInt(C)};
   if(editKey){
     db.ref('results/'+editKey).update(data).then(()=>{msg.textContent='✅ Updated!';resetForm()});
@@ -53,21 +69,23 @@ function save(){
     db.ref('draw').set(data);
   }
 }
-function resetForm(){editKey=null;t.value='';a.value='';b.value='';c.value='';formTitle.textContent='New Result Publish';saveBtn.textContent='Publish';}
-function editResult(key, r){
-  editKey=key;
-  t.value=r.timeLabel; a.value=r.a; b.value=r.b; c.value=r.c;
+function resetForm(){editKey=null;editTimeLabel='';a.value='';b.value='';c.value='';formTitle.textContent='New Result Publish';saveBtn.textContent='Publish';updateAutoTime();}
+function editResult(i){
+  let r=allResults[i]; editKey=r.key; editTimeLabel=r.timeLabel;
+  a.value=r.a; b.value=r.b; c.value=r.c;
   formTitle.textContent='Edit Result - '+r.timeLabel;
+  autoTimeLabel.textContent='Editing Time: '+r.timeLabel+' (same rahega)';
   saveBtn.textContent='Update Result';
   window.scrollTo(0,0);
 }
 db.ref('results').on('value',s=>{
-  let h='';
+  let h=''; allResults=[];
   s.forEach(x=>{
-    let r=x.val();
-    if((r.dateKey||dk(r.time))==dk(Date.now())){
-      h=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick='editResult("${x.key}",${JSON.stringify(r).replace(/"/g,"&quot;")})'>Edit</button></td></tr>`+h;
-    }
+    let r=x.val(); r.key=x.key;
+    if((r.dateKey||dk(r.time))==dk(Date.now())){ allResults.unshift(r); }
+  });
+  allResults.forEach((r,i)=>{
+    h+=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td><td><button class="edit" onclick="editResult(${i})">Edit</button></td></tr>`;
   });
   list.innerHTML=h||'<tr><td colspan=5>No results</td></tr>';
 });

@@ -1,20 +1,12 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SuperLotto Admin</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<style>body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}input{padding:14px;width:75px;font-size:20px;text-align:center;border-radius:10px;border:0;margin:5px}button{padding:13px 22px;border:0;border-radius:10px;font-weight:700;margin:5px;cursor:pointer}</style></head><body>
-<h1>Admin - SuperLotto</h1><p>A B C daalo aur Publish karo</p>
-<input id="a" type="number" placeholder="A"><input id="b" type="number" placeholder="B"><input id="c" type="number" placeholder="C"><br><br>
-<button style="background:#7c3aed;color:#fff" onclick="pub()">Publish</button><button style="background:#22c55e" onclick="rnd()">🎲 Random</button><br><br>
-<button style="background:#ef4444;color:#fff" onclick="delAll()">🗑️ Delete All History</button><button style="background:#f59e0b" onclick="delToday()">Delete Today Only</button>
-<h2 id="msg" style="color:#facc15"></h2><div id="list"></div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - SuperLotto</title><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><style>body{font-family:Arial;background:#0f172a;color:#fff;padding:20px;text-align:center}.c{background:#fff;color:#222;border-radius:20px;padding:20px;max-width:400px;margin:auto}input{width:80px;padding:12px;font-size:20px;text-align:center;border-radius:12px;border:2px solid #ddd;margin:5px}button{background:#7c3aed;color:#fff;border:0;padding:14px;width:100%;border-radius:14px;font-size:16px;margin-top:10px}table{width:100%;background:#fff;color:#000;border-collapse:collapse;margin-top:15px;border-radius:10px;overflow:hidden}th,td{padding:10px;border-bottom:1px solid #eee}</style></head><body>
+<h1>Admin Panel</h1><div class="c"><p>Live: <b id="cur">--</b></p><input type="number" id="a" placeholder="A"><input type="number" id="b" placeholder="B"><input type="number" id="c" placeholder="C"><button onclick="pub()">🚀 PUBLISH</button><p id="st"></p></div>
+<div class="c" style="margin-top:15px"><h3>Today's Results</h3><table><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr><tbody id="hist"></tbody></table></div>
 <script>
 const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
 firebase.initializeApp(cfg);let db=firebase.database();
-function slot(d){let s=new Date(d);let m=s.getMinutes();let rm=m-(m%15);s.setMinutes(rm,0,0);return s}
-function pub(){let A=+a.value,B=+b.value,C=+c.value;if(isNaN(A)||isNaN(B)||isNaN(C))return alert('3 number daalo');let n=new Date(),s=slot(n),lb=s.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),d=s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0');db.ref('draw').set({winning:[A,B,C],time:s.getTime(),timeLabel:lb,dateKey:d});db.ref('results').push({a:A,b:B,c:C,time:s.getTime(),timeLabel:lb,dateKey:d});msg.textContent='✅ '+A+' - '+B+' - '+C+' | '+lb+' ('+d+')';alert('Time Round Ho Gaya: '+lb)}
-function rnd(){a.value=Math.floor(Math.random()*100);b.value=Math.floor(Math.random()*100);c.value=Math.floor(Math.random()*100);pub()}
-function delAll(){if(!confirm('Saari history delete karni hai?'))return;db.ref('results').remove();db.ref('draw').remove();msg.textContent='Deleted All';}
-function delToday(){let n=new Date(),d=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');if(!confirm('Aaj ki history delete karni hai?'))return;db.ref('results').orderByChild('dateKey').equalTo(d).once('value',s=>{s.forEach(x=>x.ref.remove())});msg.textContent='Today Deleted';}
-db.ref('results').limitToLast(10).on('value',s=>{let h='';s.forEach(x=>{let r=x.val();h=`<div>${r.dateKey} ${r.timeLabel} - ${r.a}|${r.b}|${r.c}</div>`+h});list.innerHTML=h});
+let p=n=>String(n).padStart(2,'0');
+let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
+db.ref('draw').on('value',s=>{let v=s.val();if(v)cur.textContent=(v.timeLabel||'')+' - '+v.winning.join(' | ')});
+db.ref('results').on('value',s=>{let h='';s.forEach(x=>{let r=x.val();if((r.dateKey||dk(r.time))==dk(Date.now()))h=`<tr><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`+h});hist.innerHTML=h||'<tr><td colspan=4>No results yet</td></tr>'});
+function pub(){let av=+a.value,bv=+b.value,cv=+c.value;if(isNaN(av)||isNaN(bv)||isNaN(cv)){st.textContent='Teenon bharo';return}let n=new Date();n.setMinutes(Math.floor(n.getMinutes()/15)*15,0,0);let label=(n.getHours()%12||12)+':'+p(n.getMinutes())+' '+(n.getHours()>=12?'PM':'AM');let data={a:av,b:bv,c:cv,winning:[av,bv,cv],timeLabel:label,time:n.getTime(),dateKey:dk(n.getTime())};db.ref('draw').set(data);db.ref('results').push(data);st.textContent='✅ Published '+label;a.value=b.value=c.value=''}
 </script></body></html>

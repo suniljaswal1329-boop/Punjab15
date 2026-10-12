@@ -1,40 +1,16 @@
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin - Punjab15</title>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<style>body{font-family:Arial;background:#111;color:#fff;padding:20px}button{padding:12px;margin:5px;border:0;border-radius:8px;font-weight:700;cursor:pointer} .green{background:#22c55e}.yellow{background:#facc15}.red{background:#ef4444;color:#fff}.card{background:#222;padding:15px;border-radius:12px;margin:10px 0}</style></head>
-<body>
-<h1>Admin Panel - Punjab 15</h1>
-<button class="green" onclick="startDraw()">Start Draw</button>
-<button class="yellow" onclick="doDraw()">🎲 Random Draw</button>
-<button class="red" onclick="endDraw()">End Draw</button>
-<h2 id="res" style="font-size:28px;color:#facc15"></h2>
-<div class="card"><h3>All Tickets</h3><div id="list"></div></div>
+<style>body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}input{padding:14px;width:75px;font-size:20px;text-align:center;border-radius:10px;border:0;margin:5px}button{padding:13px 22px;border:0;border-radius:10px;font-weight:700;margin:5px;cursor:pointer}</style></head><body>
+<h1>Admin - Punjab 15</h1><p>A B C daalo aur Publish karo</p>
+<input id="a" type="number" placeholder="A"><input id="b" type="number" placeholder="B"><input id="c" type="number" placeholder="C"><br><br>
+<button style="background:#7c3aed;color:#fff" onclick="pub()">Publish</button><button style="background:#22c55e" onclick="rnd()">🎲 Random</button>
+<h2 id="msg" style="color:#facc15"></h2><div id="list"></div>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",
-  authDomain: "superlotto.firebaseapp.com",
-  databaseURL: "https://superlotto-default-rtdb.firebaseio.com",
-  projectId: "superlotto",
-  storageBucket: "superlotto.firebasestorage.app",
-  messagingSenderId: "851670105901",
-  appId: "1:851670105901:web:568c45b226b7c80f1d1da4",
-  measurementId: "G-9B7HEFN16J"
-};
-firebase.initializeApp(firebaseConfig); const db=firebase.database();
-function startDraw(){ db.ref('draw').set({status:'LIVE - Buying Open', winning:null, time:Date.now()}); alert('Draw Started'); }
-function endDraw(){ db.ref('draw/status').set('Draw Closed'); }
-function doDraw(){
-  let n=new Set(); while(n.size<6) n.add(Math.floor(Math.random()*49)+1);
-  let a=[...n]; document.getElementById('res').textContent = 'Winning: '+a.join(' - ');
-  db.ref('draw').update({winning:a, status:'Result Declared', time:Date.now()});
-}
-db.ref('tickets').on('value', s=>{
-  let h=''; s.forEach(c=>{ let t=c.val(); h+='<div style="margin:8px 0">'+t.name+' | '+t.numbers.join(',')+' | '+t.status+' <button onclick="approve(\''+c.key+'\')">Approve</button> <button onclick="delTicket(\''+c.key+'\')" style="background:#ef4444;color:#fff">Delete</button></div>'; });
-  document.getElementById('list').innerHTML = h || 'No tickets';
-});
-function approve(k){ db.ref('tickets/'+k+'/status').set('approved'); }
-function delTicket(k){ if(confirm('Delete?')) db.ref('tickets/'+k).remove(); }
-</script>
-</body></html>
+const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
+firebase.initializeApp(cfg);let db=firebase.database();
+function pub(){let A=+a.value,B=+b.value,C=+c.value;if(isNaN(A)||isNaN(B)||isNaN(C))return alert('3 number daalo');let n=new Date(),lb=n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),d=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');db.ref('draw').set({winning:[A,B,C],time:n.getTime(),timeLabel:lb,dateKey:d});db.ref('results').push({a:A,b:B,c:C,time:n.getTime(),timeLabel:lb,dateKey:d});msg.textContent='✅ '+A+' - '+B+' - '+C}
+function rnd(){a.value=Math.floor(Math.random()*100);b.value=Math.floor(Math.random()*100);c.value=Math.floor(Math.random()*100);pub()}
+db.ref('results').limitToLast(10).on('value',s=>{let h='';s.forEach(x=>{let r=x.val();h=`<div>${r.dateKey} ${r.timeLabel} - ${r.a}|${r.b}|${r.c}</div>`+h});list.innerHTML=h});
+</script></body></html>

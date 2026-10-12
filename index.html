@@ -1,15 +1,95 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SuperLotto Live Result</title><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script><style>body{font-family:Arial,sans-serif;margin:0;background:#FFFACD;color:#222;text-align:center}h1{font-size:38px;margin:20px 10px 5px;color:#222}.date{color:#444;font-size:18px}.card{background:#fff;border-radius:25px;padding:20px;margin:15px;box-shadow:0 4px 15px rgba(0,0,0,.1)}.pill{background:#8b5cf6;color:#fff;display:inline-block;padding:8px 18px;border-radius:20px;font-weight:bold}.circles{display:flex;justify-content:center;gap:12px;margin:20px 0}.c{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:bold}.a{background:#7dd3fc}.b{background:#f9a8d4}.c2{background:#6ee7b7}table{width:100%;background:#fff;border-collapse:collapse;border-radius:15px;overflow:hidden}th,td{padding:10px;border-bottom:1px solid #eee;text-align:center}.timer{font-size:32px;font-weight:bold}.btn{background:#111827;color:#fff;border:0;padding:10px 20px;border-radius:25px;font-size:16px}</style></head><body>
-<h1>SuperLotto Live Result</h1><div class="date" id="today"></div>
-<div class="card"><div class="pill" id="timeLabel">Result for --</div><div class="circles"><div><div class="c a" id="nA">--</div><div>A</div></div><div><div class="c b" id="nB">--</div><div>B</div></div><div><div class="c c2" id="nC">--</div><div>C</div></div></div><p>NEXT RESULT IN</p><div class="timer" id="count">--:--:--</div><br><button class="btn" onclick="toggleHist()">🗓️ Search</button></div>
-<h2>🕐 Today's Results</h2><div class="card" style="padding:0"><table><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr><tbody id="hist"></tbody></table></div>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SuperLotto Live Result</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+body{font-family:Arial;background:#fef9c3;margin:0;padding:15px;text-align:center}
+h1{font-size:32px;margin:10px 0 0}
+.card{background:#fff;padding:20px;border-radius:20px;max-width:450px;margin:20px auto;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+.badge{background:#8b5cf6;color:#fff;padding:8px 20px;border-radius:20px;display:inline-block;font-weight:bold;font-size:18px}
+.balls{display:flex;justify-content:space-around;margin:20px 0}
+.ball{width:85px;height:85px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:bold}
+.b1{background:#7dd3fc}.b2{background:#f9a8d4}.b3{background:#34d399}
+.timer{font-size:36px;font-weight:bold;margin:5px 0}
+.btn{background:#111827;color:#fff;border:0;padding:10px 20px;border-radius:20px;font-size:16px;cursor:pointer}
+table{width:100%;background:#fff;border-collapse:collapse;border-radius:15px;overflow:hidden}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:center;font-size:14px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:99}
+.modalBox{background:#fff;padding:20px;border-radius:15px;width:90%;max-width:400px}
+input{padding:10px;border:1px solid #ddd;border-radius:8px;margin:5px}
+</style>
+</head>
+<body>
+<h1>SuperLotto Live<br>Result</h1>
+<p id="todayDate" style="color:#555;font-size:18px"></p>
+
+<div class="card">
+<div class="badge" id="resultFor">Result for --</div>
+<div class="balls">
+<div><div class="ball b1" id="na">--</div><div>A</div></div>
+<div><div class="ball b2" id="nb">--</div><div>B</div></div>
+<div><div class="ball b3" id="nc">--</div><div>C</div></div>
+</div>
+<div>NEXT RESULT IN</div>
+<div class="timer" id="timer">00:00:00</div>
+<button class="btn" onclick="openHistory()">🗓️ Search</button>
+</div>
+
+<h2>🕐 Today's Results</h2>
+<table><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr><tbody id="list"></tbody></table>
+
+<!-- HISTORY MODAL -->
+<div class="modal" id="histModal">
+<div class="modalBox">
+<h3>History - Search Result</h3>
+<input type="date" id="histDate">
+<button class="btn" onclick="searchHistory()">Search</button>
+<button class="btn" style="background:#666" onclick="closeHistory()">Close</button>
+<div id="histResult" style="margin-top:15px;text-align:left"></div>
+</div>
+</div>
+
 <script>
 const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
 firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
-today.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-db.ref('draw').on('value',s=>{let v=s.val();if(v){timeLabel.textContent='Result for '+v.timeLabel;nA.textContent=p(v.a);nB.textContent=p(v.b);nC.textContent=p(v.c)}});
-db.ref('results').on('value',s=>{let h='';s.forEach(x=>{let r=x.val();if((r.dateKey||dk(r.time))==dk(Date.now()))h=`<tr><td>${r.dateKey||dk(r.time)}</td><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`+h});hist.innerHTML=h||'<tr><td colspan=5>No results yet</td></tr>'});
-function toggleHist(){let e=document.querySelector('.card:last-child');e.style.display=e.style.display=='none'?'block':'none'}
-setInterval(()=>{let n=new Date();let next=new Date(n);next.setMinutes(Math.ceil((n.getMinutes()+1)/15)*15,0,0);let d=next-n;count.textContent=p(Math.floor(d/3600000))+':'+p(Math.floor(d%3600000/60000))+':'+p(Math.floor(d%60000/1000))},1000);
-</script></body></html>
+todayDate.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+db.ref('draw').on('value',s=>{
+  let r=s.val(); if(!r) return;
+  na.textContent=p(r.a); nb.textContent=p(r.b); nc.textContent=p(r.c);
+  resultFor.textContent='Result for '+r.timeLabel;
+});
+db.ref('results').on('value',s=>{
+  let h=''; let arr=[];
+  s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==dk(Date.now())) arr.unshift(r);});
+  arr.forEach(r=>{ h+=`<tr><td>${r.dateKey||dk(r.time)}</td><td>${r.timeLabel}</td><td>${p(r.a)}</td><td>${p(r.b)}</td><td>${p(r.c)}</td></tr>`;});
+  list.innerHTML=h||'<tr><td colspan=5>No results today</td></tr>';
+});
+function tick(){
+  let now=new Date(); let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15;
+  let target=new Date(now); if(next>=60){target.setHours(target.getHours()+1);next=0;} target.setMinutes(next,0,0);
+  let diff=target-now; let h=Math.floor(diff/3600000), m=Math.floor(diff%3600000/60000), s=Math.floor(diff%60000/1000);
+  timer.textContent=p(h)+':'+p(m)+':'+p(s);
+}
+setInterval(tick,1000); tick();
+
+// HISTORY BUTTON FIX - ONLY THIS IS NEW
+function openHistory(){ histModal.style.display='flex'; histDate.value=dk(Date.now()); searchHistory(); }
+function closeHistory(){ histModal.style.display='none'; }
+function searchHistory(){
+  let d=histDate.value; if(!d){histResult.innerHTML='Date chuno';return}
+  db.ref('results').once('value',s=>{
+    let h=''; s.forEach(x=>{let r=x.val(); if((r.dateKey||dk(r.time))==d) h+=`<div style="border-bottom:1px solid #eee;padding:8px">${r.timeLabel} - <b>${p(r.a)} ${p(r.b)} ${p(r.c)}</b></div>`;});
+    histResult.innerHTML=h||'<div>No results for this date</div>';
+  });
+}
+histModal.addEventListener('click',e=>{ if(e.target==histModal) closeHistory(); });
+</script>
+</body>
+</html>

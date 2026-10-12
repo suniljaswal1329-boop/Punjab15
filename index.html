@@ -3,93 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Punjab 15 - SuperLotto</title>
+<title>Punjab 15 Live Result</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
-*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#0f172a;color:#fff;margin:0;padding:15px;text-align:center}
-h1{color:#facc15}.card{background:#1e293b;padding:20px;border-radius:16px;max-width:420px;margin:15px auto;text-align:left}
-input{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;font-size:15px}
-button{background:#facc15;border:0;padding:13px;border-radius:10px;font-weight:800;width:100%;cursor:pointer;font-size:16px}
-.nums{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:10px 0}
-.n{width:42px;height:42px;border-radius:50%;background:#334155;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700}
-.n.sel{background:#facc15;color:#000;transform:scale(1.1)}
-#winning{font-size:26px;font-weight:900;color:#facc15}
-.live{color:#22c55e;font-weight:800}
-.ticket{background:#0f172a;padding:10px;border-radius:10px;margin:6px 0}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:linear-gradient(180deg,#8b5cf6,#6d28d9 45%,#4c1d95);min-height:100vh;padding:15px;color:#fff}
+h1{text-align:center;font-size:30px;margin-top:15px;font-weight:700}
+.sub{text-align:center;opacity:.85;font-size:14px;margin:6px 0 20px}
+.card{background:#fff;color:#1e293b;border-radius:28px;padding:25px 15px 28px;max-width:480px;margin:0 auto;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,.3)}
+.badge{background:#7c3aed;color:#fff;display:inline-block;padding:9px 24px;border-radius:20px;font-size:16px}
+.balls{display:flex;justify-content:space-around;margin:28px 0 5px}
+.ball{width:95px;height:95px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#a78bfa,#7c3aed 55%,#4c1d95);color:#fff;font-size:31px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 25px rgba(124,58,237,.45)}
+.label{margin-top:11px;color:#64748b;font-weight:700;font-size:18px}
+.next{margin-top:28px;color:#64748b;font-size:13px;letter-spacing:1.8px}
+.timer{font-size:40px;font-weight:800;color:#1e1b4b;margin:5px 0 22px;letter-spacing:1px}
+.btn{background:#0f172a;color:#fff;border:0;padding:13px 26px;border-radius:25px;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.sec{max-width:480px;margin:24px auto 0}
+.sec h2{font-size:22px;display:flex;align-items:center;gap:6px}
+table{width:100%;background:#fff;color:#000;border-collapse:collapse;border-radius:10px;overflow:hidden;margin-top:12px}
+th,td{padding:13px 8px;text-align:center;font-size:16px;border-bottom:1px solid #eee}
+th{background:#f8fafc;font-weight:700}
+.num{border:1px solid #ddd;padding:4px 11px;border-radius:8px;display:inline-block;background:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:99;padding:15px}
+.modal.show{display:flex}
+.modalBox{background:#fff;color:#000;width:100%;max-width:420px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
+.modalBox h3{margin-bottom:12px;text-align:center}
+.modalBox input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;margin:8px 0;font-size:16px}
+.modalBox button{width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;cursor:pointer;margin-top:8px}
+.searchBtn{background:#7c3aed;color:#fff}.closeBtn{background:#e2e8f0}
+@media(max-width:420px){.ball{width:85px;height:85px;font-size:27px}.timer{font-size:34px}}
 </style>
 </head>
 <body>
-<h1>🎰 Punjab 15 SuperLotto</h1>
-<p>Pick 6 Numbers - Win Big!</p>
+<h1>Punjab 15 Live Result</h1>
+<p class="sub">Result updates automatically at every interval</p>
 
 <div class="card">
-<h3>🔴 Live Draw</h3>
-<p>Status: <span id="status" class="live">Connecting...</span></p>
-<div id="winning">- - - - - -</div>
-<p id="drawTime" style="font-size:12px;color:#94a3b8"></p>
+<div class="badge" id="rt">Result for --:--</div>
+<div class="balls">
+<div><div class="ball" id="a">--</div><div class="label">A</div></div>
+<div><div class="ball" id="b">--</div><div class="label">B</div></div>
+<div><div class="ball" id="c">--</div><div class="label">C</div></div>
+</div>
+<div class="next">NEXT RESULT IN</div>
+<div class="timer" id="cd">00:15:00</div>
+<button class="btn" onclick="openSearch()">🗓️ Search Previous Dates</button>
 </div>
 
-<div class="card">
-<h3>🎟️ Buy Ticket - ₹10</h3>
-<p>Pick 6 Numbers:</p>
-<div class="nums" id="grid"></div>
-<p>Selected: <b id="selCount">0 / 6</b></p>
-<input id="name" placeholder="Your Name *">
-<input id="phone" placeholder="Phone Number">
-<button onclick="buyTicket()">Buy Ticket</button>
-<p id="msg" style="color:#22c55e"></p>
+<div class="sec">
+<h2>🕐 Today's Results</h2>
+<table><thead><tr><th>Time</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="hist"></tbody></table>
 </div>
 
-<div class="card">
-<h3>📋 Recent Tickets</h3>
-<div id="tickets">Loading...</div>
-</div>
+<div class="modal" id="modal"><div class="modalBox">
+<h3>🔍 Search Previous Results</h3>
+<label>Select Date</label>
+<input type="date" id="searchDate">
+<button class="searchBtn" onclick="doSearch()">Search Result</button>
+<div id="searchResult" style="margin-top:12px"></div>
+<button class="closeBtn" onclick="closeSearch()">Close</button>
+</div></div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",
-  authDomain: "superlotto.firebaseapp.com",
-  databaseURL: "https://superlotto-default-rtdb.firebaseio.com",
-  projectId: "superlotto",
-  storageBucket: "superlotto.firebasestorage.app",
-  messagingSenderId: "851670105901",
-  appId: "1:851670105901:web:568c45b226b7c80f1d1da4",
-  measurementId: "G-9B7HEFN16J"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let sel = [];
-const grid = document.getElementById('grid');
-for(let i=1;i<=49;i++){
-  let d=document.createElement('div'); d.className='n'; d.textContent=i;
-  d.onclick=()=>{
-    if(sel.includes(i)){ sel=sel.filter(x=>x!==i); d.classList.remove('sel'); }
-    else if(sel.length<6){ sel.push(i); d.classList.add('sel'); }
-    else alert('Only 6 numbers!');
-    document.getElementById('selCount').textContent = sel.length+' / 6';
-  };
-  grid.appendChild(d);
-}
-db.ref('draw').on('value', s=>{
-  let v=s.val()||{};
-  document.getElementById('status').textContent = v.status || 'Waiting For Draw';
-  if(v.winning) document.getElementById('winning').textContent = v.winning.join(' - ');
-  document.getElementById('drawTime').textContent = v.time ? new Date(v.time).toLocaleString() : '';
-});
-function buyTicket(){
-  if(sel.length!==6) return alert('Please pick 6 numbers');
-  const name=document.getElementById('name').value.trim();
-  if(!name) return alert('Enter Name');
-  db.ref('tickets').push({name, phone:document.getElementById('phone').value, numbers:sel.sort((a,b)=>a-b), status:'pending', time:Date.now()}).then(()=>{
-    document.getElementById('msg').textContent='✅ Ticket Booked! Good Luck '+name;
-    sel=[]; document.querySelectorAll('.n').forEach(e=>e.classList.remove('sel')); document.getElementById('selCount').textContent='0 / 6';
-  });
-}
-db.ref('tickets').limitToLast(10).on('value', s=>{
-  let h=''; s.forEach(c=>{ let t=c.val(); h='<div class="ticket">🎫 '+t.name+' - '+t.numbers.join(', ')+' - <b>'+t.status+'</b></div>'+h; });
-  document.getElementById('tickets').innerHTML = h || 'No tickets yet';
-});
-</script>
-</body>
-</html>
+const firebaseConfig={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4",measurementId:"G-9B7HEFN16J"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+let allResults=[];
+db.ref('draw').on('value',s=>{let v=s.val()||{};if(v.winning){document.getElementById('a').textContent=String(v.winning[0]).padStart(2,'0');document.getElementById('b').textContent=String(v.winning[1]).padStart(2,'0');document.getElementById('c').textContent=String(v.winning[2]).padStart(2,'0');document.getElementById('rt').textContent='Result for '+(v.timeLabel||'')}});
+db.ref('results').on('value',s=>{allResults=[];s.forEach(c=>allResults.push(c.val()));renderToday();});
+function todayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function renderToday(){let rows='';let arr=allResults.filter(r=>r.dateKey===todayKey()).reverse();arr.forEach(r=>{rows+=`<tr><td>${r.timeLabel}</td><td><span class="num">${String(r.a).padStart(2,'0')}</span></td><td><span class="num">${String(r.b).padStart(2,'0')}</span></td><td><span class="num">${String(r.c).padStart(2,'0')}</span></td></tr>`});document.getElementById('hist').innerHTML=rows||'<tr><td colspan="4">No results yet today</td></tr>';}
+function tick(){let n=new Date();let rem=(15-(n.getMinutes()%15))*60-n.getSeconds();document.getElementById('cd').textContent='00:'+String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0')}setInterval(tick,1000);tick();
+function openSearch(){document.getElementById('modal').classList.add('show');document.getElementById('searchDate').value=todayKey();doSearch();}
+function closeSearch(){document.getElementById('modal').classList.remove('show');}
+function doSearch(){let d=document.getElementById('search

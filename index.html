@@ -11,6 +11,7 @@ body{font-family:Arial;background:#fef9c3;margin:0;padding:0;text-align:center}
 h1{font-size:32px;margin:10px 0 0}
 .card{background:#fff;padding:20px;border-radius:20px;max-width:500px;margin:15px auto;box-shadow:0 4px 15px rgba(0,0,0,.1)}
 .badge{background:#8b5cf6;color:#fff;padding:5px 15px;border-radius:20px;font-weight:bold}
+.badge.off{background:#6b7280}
 .balls{display:flex;justify-content:space-around;margin:20px 0}
 .ball{width:85px;height:85px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold}
 .b1{background:#7dd3fc}.b2{background:#f9a8d4}.b3{background:#34d399}
@@ -19,10 +20,14 @@ h1{font-size:32px;margin:10px 0 0}
 table{width:100%;background:#fff;border-collapse:collapse}
 th,td{padding:10px;border-bottom:1px solid #eee}
 .wrap{max-width:500px;margin:15px auto;padding:0 15px}
+#nextLabel{font-size:13px;color:#666}
 </style>
 </head>
 <body>
 <div class="wrap">
+<h1>🎲 SuperLotto Live Result</h1>
+<p id="dateLine"></p>
+
 <div class="card">
 <div><span class="badge" id="liveTime">LIVE</span></div>
 <div class="balls">
@@ -32,8 +37,11 @@ th,td{padding:10px;border-bottom:1px solid #eee}
 </div>
 <div>NEXT RESULT IN</div>
 <div class="timer" id="count">00:00:00</div>
-<button class="btn" onclick="location.href='search.html'">🗓️ Search</button>
+<div id="nextLabel"></div>
+<button class="btn" onclick="window.location.href='search.html'">🗓️ Search</button>
 </div>
+
+<p>Result for <b id="resultFor">--</b></p>
 
 <h2>🕐 Today's Results</h2>
 <table><tr><th>Date</th><th>Time</th><th>A</th><th>B</th><th>C</th></tr><tbody id="list"></tbody></table>
@@ -44,15 +52,16 @@ const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlot
 firebase.initializeApp(cfg);let db=firebase.database();
 let p=n=>String(n).padStart(2,'0');
 let dk=t=>{let d=new Date(t);return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
-let format12=(h,m)=>{let ap=h>=12?'PM':'AM';let hh=h%12;if(hh==0)hh=12;return hh+':'+p(m)+' '+ap;};
+let now=new Date();
+dateLine.textContent=now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
 db.ref('draw').on('value',s=>{
   let d=s.val(); if(!d) return;
   ballA.textContent=p(d.a); ballB.textContent=p(d.b); ballC.textContent=p(d.c);
   liveTime.textContent=d.timeLabel||'LIVE';
+  resultFor.textContent=d.timeLabel||'--';
 });
 
-// TIME PATTERN SET - Sirf ye change hai
 function toMin(t){
   if(!t) return 0;
   let parts=t.split(' ');
@@ -70,13 +79,40 @@ db.ref('results').on('value',s=>{
   list.innerHTML=h;
 });
 
-setInterval(()=>{
-  let now=new Date(); let mins=now.getMinutes(); let next=Math.ceil((mins+1)/15)*15; let t=new Date(now);
-  if(next>=60){t.setHours(t.getHours()+1);next=0} t.setMinutes(next,0,0);
+function updateTimer(){
+  let now=new Date();
+  let mins = now.getHours()*60 + now.getMinutes();
+  let offStart = 22*60;
+  let onTime = 8*60 + 45;
+  if(mins >= offStart || mins < onTime){
+    count.textContent="OFF";
+    count.style.color="#6b7280";
+    liveTime.textContent="CLOSED";
+    liveTime.classList.add('off');
+    nextLabel.textContent="Next result tomorrow at 08:45 AM";
+    return;
+  }
+  liveTime.classList.remove('off');
+  count.style.color="#000";
+  nextLabel.textContent="";
+  let m = now.getMinutes();
+  let next = Math.ceil((m+1)/15)*15;
+  let t = new Date(now);
+  if(next>=60){ t.setHours(t.getHours()+1); next=0 }
+  t.setMinutes(next,0,0);
+  if(t.getHours()*60 + t.getMinutes() > offStart){
+    count.textContent="OFF";
+    liveTime.textContent="CLOSED";
+    liveTime.classList.add('off');
+    nextLabel.textContent="Next result tomorrow at 08:45 AM";
+    return;
+  }
   let diff=Math.max(0,Math.floor((t-now)/1000));
   let hh=Math.floor(diff/3600), mm=Math.floor((diff%3600)/60), ss=diff%60;
   count.textContent=p(hh)+':'+p(mm)+':'+p(ss);
-},1000);
+}
+setInterval(updateTimer,1000);
+updateTimer();
 </script>
 </body>
 </html>

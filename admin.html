@@ -1,16 +1,20 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin</title>
+<title>SuperLotto Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}input{padding:14px;width:75px;font-size:20px;text-align:center;border-radius:10px;border:0;margin:5px}button{padding:13px 22px;border:0;border-radius:10px;font-weight:700;margin:5px;cursor:pointer}</style></head><body>
-<h1>Admin - Punjab 15</h1><p>A B C daalo aur Publish karo</p>
+<h1>Admin - SuperLotto</h1><p>A B C daalo aur Publish karo</p>
 <input id="a" type="number" placeholder="A"><input id="b" type="number" placeholder="B"><input id="c" type="number" placeholder="C"><br><br>
-<button style="background:#7c3aed;color:#fff" onclick="pub()">Publish</button><button style="background:#22c55e" onclick="rnd()">🎲 Random</button>
+<button style="background:#7c3aed;color:#fff" onclick="pub()">Publish</button><button style="background:#22c55e" onclick="rnd()">🎲 Random</button><br><br>
+<button style="background:#ef4444;color:#fff" onclick="delAll()">🗑️ Delete All History</button><button style="background:#f59e0b" onclick="delToday()">Delete Today Only</button>
 <h2 id="msg" style="color:#facc15"></h2><div id="list"></div>
 <script>
 const cfg={apiKey:"AIzaSyAYINd0kww95bYvwRzjio8uabSuuXsLO1o",authDomain:"superlotto.firebaseapp.com",databaseURL:"https://superlotto-default-rtdb.firebaseio.com",projectId:"superlotto",storageBucket:"superlotto.firebasestorage.app",messagingSenderId:"851670105901",appId:"1:851670105901:web:568c45b226b7c80f1d1da4"};
 firebase.initializeApp(cfg);let db=firebase.database();
-function pub(){let A=+a.value,B=+b.value,C=+c.value;if(isNaN(A)||isNaN(B)||isNaN(C))return alert('3 number daalo');let n=new Date(),lb=n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),d=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');db.ref('draw').set({winning:[A,B,C],time:n.getTime(),timeLabel:lb,dateKey:d});db.ref('results').push({a:A,b:B,c:C,time:n.getTime(),timeLabel:lb,dateKey:d});msg.textContent='✅ '+A+' - '+B+' - '+C}
+function slot(d){let s=new Date(d);s.setMinutes(Math.floor(s.getMinutes()/15)*15,0,0);return s}
+function pub(){let A=+a.value,B=+b.value,C=+c.value;if(isNaN(A)||isNaN(B)||isNaN(C))return alert('3 number daalo');let n=new Date(),s=slot(n),lb=s.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),d=s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0');db.ref('draw').set({winning:[A,B,C],time:s.getTime(),timeLabel:lb,dateKey:d});db.ref('results').push({a:A,b:B,c:C,time:s.getTime(),timeLabel:lb,dateKey:d});msg.textContent='✅ '+A+' - '+B+' - '+C+' | '+lb+' ('+d+')'}
 function rnd(){a.value=Math.floor(Math.random()*100);b.value=Math.floor(Math.random()*100);c.value=Math.floor(Math.random()*100);pub()}
+function delAll(){if(!confirm('Saari history delete karni hai?'))return;db.ref('results').remove();db.ref('draw').remove();msg.textContent='Deleted All';}
+function delToday(){let n=new Date(),d=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');if(!confirm('Aaj ki history delete karni hai?'))return;db.ref('results').orderByChild('dateKey').equalTo(d).once('value',s=>{s.forEach(x=>x.ref.remove())});msg.textContent='Today Deleted';}
 db.ref('results').limitToLast(10).on('value',s=>{let h='';s.forEach(x=>{let r=x.val();h=`<div>${r.dateKey} ${r.timeLabel} - ${r.a}|${r.b}|${r.c}</div>`+h});list.innerHTML=h});
 </script></body></html>
